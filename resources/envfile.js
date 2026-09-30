@@ -1,8 +1,8 @@
 /**
  * Reads the .env the Andon configurator downloads: KEY=VALUE, # comments, optional
  * `export` and quotes, one view per prefix (<P>VIEW, <P>WRITE_SECRET, <P>CONTENT_KEY,
- * <P>KEY_VERSION, <P>URL, <P>INVITE_SECRET). The same rules as the configurator's
- * useViewSession.ts, so a file it accepts is accepted here.
+ * <P>KEY_VERSION, <P>URL, <P>INVITE_SECRET). The same rules as the configurator
+ * applies, so a file it accepts is accepted here.
  *
  * One file for both sides: the runtime requires it, and Node-RED serves it to the
  * editor from resources/, where the config dialog parses the file in the browser.

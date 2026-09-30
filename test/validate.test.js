@@ -1,8 +1,8 @@
 'use strict';
 /**
- * The semantic rules against the configurator's (website-andon,
- * composables/useViewValidator.ts): the same verdict, and a warning wherever the
- * configurator warns. Each case changes one thing in the spec's sample document.
+ * The semantic rules against the configurator's: the same verdict, and a warning
+ * wherever the configurator warns. Each case changes one thing in the sample
+ * document.
  */
 
 const test = require('node:test');

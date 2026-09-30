@@ -1,6 +1,6 @@
-# Publishes the package to npm. Runs in the public mirror on GitHub, started by
-# the tag v<version> that scripts/mirror.sh pushes; in the source repository this
-# file does nothing.
+# Publishes the package to npm, started by the tag v<version> that a release
+# pushes to this repository. It can also be started by hand for such a tag
+# (Actions, "Run workflow", pick the tag), should the push not have started it.
 #
 # No npm token: npm trusts this workflow in this repository through OIDC
 # ("trusted publishing"), and attaches a provenance statement that ties the
@@ -19,6 +19,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: read

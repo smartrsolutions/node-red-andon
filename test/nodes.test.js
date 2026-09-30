@@ -1,8 +1,8 @@
 'use strict';
 /**
  * The two nodes inside a real Node-RED (node-red-node-test-helper), uploading to a
- * stand-in relay on localhost. ANDON_RELAY_URL points them there - the same switch
- * a developer uses against the dev stack.
+ * stand-in relay on localhost. ANDON_RELAY_URL points them there - the switch a
+ * developer uses to try the package against a relay of their own.
  */
 
 const test = require('node:test');
@@ -148,11 +148,11 @@ test('the dialog learns which relay this runtime talks to', async () => {
 });
 
 test('ANDON_RELAY_ALIASES names the other addresses of the same relay', async () => {
-    process.env.ANDON_RELAY_ALIASES = ' http://127.0.0.1:8080/ , http://192.168.1.25:8080,';
+    process.env.ANDON_RELAY_ALIASES = ' http://127.0.0.1:8080/ , http://127.0.0.1:8081,';
     try {
         await helper.load([viewNode, outNode], flow(), credentials);
         const res = await helper.request().get('/andon-view/relay').expect(200);
-        assert.deepEqual(res.body.aliases, ['http://127.0.0.1:8080', 'http://192.168.1.25:8080']);
+        assert.deepEqual(res.body.aliases, ['http://127.0.0.1:8080', 'http://127.0.0.1:8081']);
     } finally {
         delete process.env.ANDON_RELAY_ALIASES;
     }

@@ -1,8 +1,6 @@
 'use strict';
-// The template the tests start from: the spec's sample document, the same 14
-// tiles in all nine kinds that the factory simulator sends. A copy of
-// spec/view-v1.sample.json (npm run sync-spec), so the tests also run where the
-// spec is not next to the package.
+// The template the tests start from: the sample view document of the view
+// format, 14 tiles in all nine kinds.
 const fs = require('fs');
 const path = require('path');
 

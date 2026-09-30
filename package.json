@@ -43,8 +43,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "test": "node --test",
-    "sync-spec": "node scripts/sync-spec.js"
+    "test": "node --test"
   },
   "dependencies": {
     "ajv": "^8.20.0",
