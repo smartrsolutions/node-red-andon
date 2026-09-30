@@ -1,0 +1,42 @@
+<script type="text/html" data-help-name="andon-out">
+    <p>Sends values to the tiles of an Andon view. They appear on every paired iPhone, end-to-end encrypted.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The ID of the tile, as listed in the view (for example <code>t_oee</code>).</dd>
+        <dt>payload <span class="property-type">number | string | array | object</span></dt>
+        <dd>The value. What it does depends on the tile:
+            <ul>
+                <li><b>label, gauge, progress, donut</b>: a number (or text for a label) replaces the value.</li>
+                <li><b>line, bar over time</b>: a number is appended to the series.</li>
+                <li><b>bar with categories, pie, donut</b>: an array replaces the values, one per category.</li>
+                <li><b>table</b>: an array of rows; a row is an array of cells.</li>
+                <li><b>timeline</b>: a state ID starts a new segment.</li>
+                <li><b>any tile</b>: an object sets the fields it names, for example
+                    <code>{"value": 79.3, "status": "warning", "subtext": "..."}</code>; <code>null</code> removes a field.</li>
+            </ul>
+        </dd>
+        <dt class="optional">timestamp <span class="property-type">number | string</span></dt>
+        <dd>Time of a sample or segment, in milliseconds or ISO 8601. Default: now.</dd>
+        <dt class="optional">series <span class="property-type">string</span></dt>
+        <dd>Name of the series to write to. Default: the first.</dd>
+        <dt class="optional">lane <span class="property-type">string</span></dt>
+        <dd>Name of the timeline lane. Default: the first.</dd>
+    </dl>
+    <p>Without <code>msg.topic</code>, <code>msg.payload</code> may be an object of tile IDs and values
+       (<code>{"t_oee": 79.3, "t_shift": 580}</code>), or a whole view document that replaces the state.</p>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>A summary of every upload this node contributed to: view, key version, notify, sizes, status code.
+            No secret, no envelope.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>Values are collected and sent at most once per interval of the view. The status of a tile is your judgement:
+       the app does not compute it. Tick <i>status from bands</i> in the view to have it derived.</p>
+    <p>A value that does not fit its tile is refused and reported to a Catch node; the view stays as it was.</p>
+    <p>If no value arrives, nothing is sent, and the app shows the view as stale once its time is up.</p>
+</script>

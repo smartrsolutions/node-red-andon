@@ -1,0 +1,18 @@
+<script type="text/html" data-help-name="andon-view">
+    <p>Eine Andon-View: wohin die Werte gehen und welche Kacheln es gibt.</p>
+    <h3>Einrichten</h3>
+    <ol>
+        <li>Die Kacheln im <a href="https://andon.app/konfigurator" target="_blank" rel="noopener">Andon-Konfigurator</a> gestalten und dort die View anlegen.</li>
+        <li>Die <code>.env</code> und die Vorlage herunterladen und beide hier importieren.</li>
+        <li>Den QR-Code des Konfigurators mit der Andon-App scannen.</li>
+    </ol>
+    <p>Write-Secret und Content-Key liegen in den Credentials von Node-RED: verschlüsselt und nie Teil eines exportierten Flows.
+       Der Content-Key verlässt Node-RED nie. Nach einer Rotation im Konfigurator die neue <code>.env</code> importieren.</p>
+    <h3>Einstellungen</h3>
+    <dl class="message-properties">
+        <dt>Intervall</dt><dd>Höchstens ein Upload pro Intervall, mindestens 10 s. Die erste Änderung nach einer ruhigen Phase geht sofort raus.</dd>
+        <dt>Veraltet nach</dt><dd>Wie lange die App einem Upload traut. Solange Werte kommen, geht nach der halben Zeit ein Heartbeat raus, auch ohne Änderung.</dd>
+        <dt>Geräte wecken</dt><dd>Standardmäßig weckt nur ein geänderter Status die gekoppelten Geräte. Jedes Wecken kostet Akku.</dd>
+        <dt>Zeitreihen</dt><dd>Wie viele und wie alte Punkte eine Reihe behält, an die Werte angehängt werden.</dd>
+    </dl>
+</script>

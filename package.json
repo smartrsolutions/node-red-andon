@@ -1,0 +1,57 @@
+{
+  "name": "@smartrsolutions/node-red-andon",
+  "version": "1.0.0",
+  "description": "Send values from Node-RED to the Andon app for iPhone: end-to-end encrypted tiles, fed by msg.topic.",
+  "keywords": [
+    "node-red",
+    "andon",
+    "iphone",
+    "dashboard",
+    "widget",
+    "iot"
+  ],
+  "license": "Apache-2.0",
+  "author": "SMARTR.solutions",
+  "homepage": "https://andon.app/en/developers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smartrsolutions/node-red-andon.git"
+  },
+  "bugs": {
+    "email": "support@andon.app"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "node-red": {
+    "version": ">=3.0.0",
+    "nodes": {
+      "andon-view": "nodes/andon-view.js",
+      "andon-out": "nodes/andon-out.js"
+    }
+  },
+  "files": [
+    "lib/",
+    "nodes/",
+    "resources/",
+    "schema/",
+    "examples/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "sync-spec": "node scripts/sync-spec.js"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "node-red": "^5.0.7",
+    "node-red-node-test-helper": "^0.3.6"
+  }
+}

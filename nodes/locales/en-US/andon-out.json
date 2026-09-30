@@ -1,0 +1,16 @@
+{
+    "andon-out": {
+        "label": {
+            "name": "Name",
+            "view": "View"
+        },
+        "status": {
+            "noView": "no view selected",
+            "queued": "next upload in __sec__ s",
+            "sent": "sent __time__",
+            "sentNext": "sent __time__ · next in __sec__ s",
+            "heartbeat": "heartbeat __time__",
+            "throttled": "__time__ throttled, retrying"
+        }
+    }
+}

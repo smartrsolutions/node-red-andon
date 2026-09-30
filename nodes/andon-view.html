@@ -1,0 +1,239 @@
+<script src="resources/@smartrsolutions/node-red-andon/envfile.js"></script>
+
+<script type="text/javascript">
+(function () {
+    // Messages of this node set: in the editor, RED._ needs the namespace spelled out.
+    function t(key, vars) { return RED._('@smartrsolutions/node-red-andon/andon-view:' + key, vars); }
+
+    // Tile titles come from a file the user picked: text, never markup.
+    function esc(s) { return $('<div>').text(String(s === undefined || s === null ? '' : s)).html(); }
+
+    function message(kind, text) {
+        $('#andon-view-msg').removeClass('andon-ok andon-err').addClass(kind === 'ok' ? 'andon-ok' : 'andon-err').text(text).show();
+    }
+
+    function readFile(input, cb) {
+        var file = input.files && input.files[0];
+        if (!file) { return; }
+        var reader = new FileReader();
+        reader.onload = function () { cb(String(reader.result)); input.value = ''; };
+        reader.readAsText(file);
+    }
+
+    function renderTiles(tiles, derive) {
+        var list = $('#andon-view-tiles').empty();
+        if (!tiles || !tiles.length) { list.append($('<div class="andon-empty">').text('–')); return; }
+        tiles.forEach(function (tile) {
+            var row = $('<div class="andon-tile">');
+            row.append($('<code>').text(tile.id));
+            row.append($('<span class="andon-kind">').text(tile.view));
+            row.append($('<span class="andon-title">').text(tile.title));
+            if (tile.bands) {
+                var box = $('<label class="andon-derive">');
+                var cb = $('<input type="checkbox">').attr('data-tile', tile.id).prop('checked', derive.indexOf(tile.id) !== -1);
+                box.append(cb).append($('<span>').text(' ' + t('andon-view.hint.derive')));
+                row.append(box);
+            }
+            list.append(row);
+        });
+    }
+
+    function checkTemplate(text, derive, quiet) {
+        if (!text.trim()) { renderTiles([], derive); $('#andon-view-tmsg').hide(); return; }
+        $.ajax({
+            url: 'andon-view/check', method: 'POST', contentType: 'application/json',
+            data: JSON.stringify({ template: text }),
+        }).done(function (res) {
+            var box = $('#andon-view-tmsg').removeClass('andon-ok andon-err');
+            if (res.ok) {
+                box.addClass('andon-ok').text(t('andon-view.import.templateOk', { count: res.tiles.length }));
+            } else {
+                box.addClass('andon-err').html(esc(t('andon-view.import.templateBad')) + '<br>' +
+                    res.errors.map(function (e) { return esc(e.path + ': ' + e.message); }).join('<br>'));
+            }
+            box.toggle(!quiet || !res.ok);
+            renderTiles(res.tiles, derive);
+        });
+    }
+
+    RED.nodes.registerType('andon-view', {
+        category: 'config',
+        defaults: {
+            name: { value: '' },
+            viewId: { value: '', required: true, validate: RED.validators.regex(/^vw_[a-z2-7]{26}$/) },
+            kv: { value: 1, required: true, validate: function (v) { return Number(v) >= 1 && Math.floor(Number(v)) === Number(v); } },
+            template: { value: '' },
+            intervalSec: { value: 30, validate: function (v) { return v === '' || Number(v) >= 10; } },
+            staleAfterSec: { value: '' },
+            notify: { value: 'auto' },
+            windowPoints: { value: 60 },
+            windowAgeSec: { value: 0 },
+            derive: { value: [] },
+        },
+        credentials: {
+            writeSecret: { type: 'password' },
+            contentKey: { type: 'password' },
+        },
+        label: function () {
+            if (this.name) { return this.name; }
+            try { var doc = JSON.parse(this.template); if (doc && doc.name) { return doc.name; } } catch (e) { /* no template */ }
+            return this.viewId || 'andon view';
+        },
+        oneditprepare: function () {
+            var node = this;
+            var derive = Array.isArray(node.derive) ? node.derive.slice() : [];
+
+            $('#andon-view-env-file').on('change', function () {
+                readFile(this, function (text) {
+                    var parsed = window.AndonEnvFile.views(text);
+                    if (!parsed.views.length) {
+                        message('err', t('andon-view.import.none') + (parsed.problems.length ? ' ' + t('andon-view.import.problems', { list: parsed.problems.join('; ') }) : ''));
+                        return;
+                    }
+                    var v = parsed.views[0];
+                    if (parsed.views.length > 1) {
+                        var names = parsed.views.map(function (x) { return x.prefix; });
+                        var pick = window.prompt(t('andon-view.import.pick') + '\n' + names.join('\n'), names[0]);
+                        v = parsed.views.filter(function (x) { return x.prefix === pick; })[0];
+                        if (!v) { return; }
+                    }
+                    $.getJSON('andon-view/relay').done(function (relay) {
+                        // aliases: development only, see ANDON_RELAY_ALIASES in lib/relay.js.
+                        if (v.url && v.url !== relay.url && (relay.aliases || []).indexOf(v.url) === -1) {
+                            message('err', t('andon-view.import.otherRelay', { url: v.url, relay: relay.url }));
+                            return;
+                        }
+                        // change, so the editor re-runs its validation and drops the red border.
+                        $('#node-config-input-viewId').val(v.view).trigger('change');
+                        $('#node-config-input-kv').val(v.kv).trigger('change');
+                        $('#node-config-input-writeSecret').val(v.writeSecret).trigger('change');
+                        $('#node-config-input-contentKey').val(v.contentKey).trigger('change');
+                        message('ok', t('andon-view.import.done', { view: v.view, kv: v.kv }) +
+                            (parsed.problems.length ? ' ' + t('andon-view.import.problems', { list: parsed.problems.join('; ') }) : ''));
+                    });
+                });
+            });
+            $('#andon-view-env-button').on('click', function () { $('#andon-view-env-file').trigger('click'); });
+
+            $('#andon-view-template-file').on('change', function () {
+                readFile(this, function (text) {
+                    $('#node-config-input-template').val(text);
+                    checkTemplate(text, derive, false);
+                });
+            });
+            $('#andon-view-template-button').on('click', function () { $('#andon-view-template-file').trigger('click'); });
+
+            var timer = null;
+            $('#node-config-input-template').on('input', function () {
+                clearTimeout(timer);
+                var text = $(this).val();
+                timer = setTimeout(function () { checkTemplate(text, derive, false); }, 400);
+            });
+            $('#andon-view-tiles').on('change', 'input[data-tile]', function () {
+                var id = $(this).attr('data-tile');
+                derive = derive.filter(function (x) { return x !== id; });
+                if (this.checked) { derive.push(id); }
+            });
+
+            checkTemplate(node.template || '', derive, true);
+        },
+        oneditsave: function () {
+            this.derive = $('#andon-view-tiles input[data-tile]:checked').map(function () { return $(this).attr('data-tile'); }).get();
+        },
+    });
+})();
+</script>
+
+<script type="text/html" data-template-name="andon-view">
+    <style>
+        .andon-section { margin: 14px 0 6px; font-weight: 600; }
+        .andon-hint { font-size: 12px; opacity: .75; margin: 2px 0 10px 104px; }
+        .andon-msg { font-size: 12px; margin: 4px 0 10px 104px; padding: 6px 8px; border-radius: 4px; display: none; }
+        .andon-ok { background: rgba(60, 160, 90, .12); }
+        .andon-err { background: rgba(200, 60, 60, .14); }
+        .andon-tiles { margin: 4px 0 0 104px; max-height: 220px; overflow: auto; border: 1px solid var(--red-ui-form-input-border-color, #ccc); border-radius: 4px; }
+        .andon-tile { display: flex; gap: 8px; align-items: baseline; padding: 3px 8px; font-size: 12px; }
+        .andon-tile code { min-width: 110px; }
+        .andon-kind { opacity: .6; min-width: 60px; }
+        .andon-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .andon-derive { width: auto !important; margin: 0 !important; white-space: nowrap; }
+        .andon-derive input { width: auto !important; margin: 0 !important; }
+        .andon-empty { padding: 6px 8px; opacity: .6; }
+        #node-config-input-template { width: 70%; height: 90px; font-family: monospace; font-size: 11px; }
+    </style>
+
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="andon-view.label.name"></span></label>
+        <input type="text" id="node-config-input-name">
+    </div>
+
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <button type="button" class="red-ui-button" id="andon-view-env-button"><i class="fa fa-upload"></i> <span data-i18n="andon-view.label.importEnv"></span></button>
+        <input type="file" id="andon-view-env-file" accept=".env,text/plain" style="display:none">
+    </div>
+    <div class="andon-hint" data-i18n="andon-view.hint.env"></div>
+    <div class="andon-msg" id="andon-view-msg"></div>
+
+    <div class="form-row">
+        <label for="node-config-input-viewId"><i class="fa fa-th-large"></i> <span data-i18n="andon-view.label.view"></span></label>
+        <input type="text" id="node-config-input-viewId" spellcheck="false" autocomplete="off">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-kv"><i class="fa fa-key"></i> <span data-i18n="andon-view.label.kv"></span></label>
+        <input type="number" id="node-config-input-kv" min="1" step="1" style="width:80px">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-writeSecret"><i class="fa fa-lock"></i> <span data-i18n="andon-view.label.writeSecret"></span></label>
+        <input type="password" id="node-config-input-writeSecret" spellcheck="false" autocomplete="off">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-contentKey"><i class="fa fa-lock"></i> <span data-i18n="andon-view.label.contentKey"></span></label>
+        <input type="password" id="node-config-input-contentKey" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="andon-section" data-i18n="andon-view.label.template"></div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <button type="button" class="red-ui-button" id="andon-view-template-button"><i class="fa fa-upload"></i> <span data-i18n="andon-view.label.importTemplate"></span></button>
+        <input type="file" id="andon-view-template-file" accept=".json,application/json" style="display:none">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="andon-view.label.template"></span></label>
+        <textarea id="node-config-input-template" spellcheck="false"></textarea>
+    </div>
+    <div class="andon-hint" data-i18n="andon-view.hint.template"></div>
+    <div class="andon-msg" id="andon-view-tmsg"></div>
+    <div class="form-row" style="margin-bottom:0">
+        <label><i class="fa fa-list"></i> <span data-i18n="andon-view.label.tiles"></span></label>
+    </div>
+    <div class="andon-tiles" id="andon-view-tiles"></div>
+    <div class="andon-hint" data-i18n="andon-view.hint.tiles"></div>
+
+    <div class="andon-section" data-i18n="andon-view.label.interval"></div>
+    <div class="form-row">
+        <label for="node-config-input-intervalSec"><i class="fa fa-clock-o"></i> <span data-i18n="andon-view.label.interval"></span></label>
+        <input type="number" id="node-config-input-intervalSec" min="10" style="width:80px"> <span data-i18n="andon-view.label.seconds"></span>
+    </div>
+    <div class="andon-hint" data-i18n="andon-view.hint.interval"></div>
+    <div class="form-row">
+        <label for="node-config-input-staleAfterSec"><i class="fa fa-hourglass-half"></i> <span data-i18n="andon-view.label.staleAfter"></span></label>
+        <input type="number" id="node-config-input-staleAfterSec" min="30" style="width:80px"> <span data-i18n="andon-view.label.seconds"></span>
+    </div>
+    <div class="andon-hint" data-i18n="andon-view.hint.staleAfter"></div>
+    <div class="form-row">
+        <label for="node-config-input-notify"><i class="fa fa-bell"></i> <span data-i18n="andon-view.label.notify"></span></label>
+        <select id="node-config-input-notify" style="width:70%">
+            <option value="auto" data-i18n="andon-view.notify.auto"></option>
+            <option value="always" data-i18n="andon-view.notify.always"></option>
+            <option value="never" data-i18n="andon-view.notify.never"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-windowPoints"><i class="fa fa-line-chart"></i> <span data-i18n="andon-view.label.window"></span></label>
+        <input type="number" id="node-config-input-windowPoints" min="0" style="width:80px"> <span data-i18n="andon-view.label.points"></span>
+        &nbsp; <span data-i18n="andon-view.hint.age"></span>
+        <input type="number" id="node-config-input-windowAgeSec" min="0" style="width:90px"> <span data-i18n="andon-view.label.seconds"></span>
+    </div>
+    <div class="andon-hint" data-i18n="andon-view.hint.window"></div>
+</script>

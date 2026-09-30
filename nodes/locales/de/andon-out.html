@@ -1,0 +1,42 @@
+<script type="text/html" data-help-name="andon-out">
+    <p>Schickt Werte an die Kacheln einer Andon-View. Sie erscheinen auf jedem gekoppelten iPhone, Ende-zu-Ende-verschlüsselt.</p>
+
+    <h3>Eingänge</h3>
+    <dl class="message-properties">
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>Die ID der Kachel, wie sie in der View steht (zum Beispiel <code>t_oee</code>).</dd>
+        <dt>payload <span class="property-type">number | string | array | object</span></dt>
+        <dd>Der Wert. Was er bewirkt, hängt von der Kachel ab:
+            <ul>
+                <li><b>label, gauge, progress, donut</b>: Eine Zahl (bei label auch Text) ersetzt den Wert.</li>
+                <li><b>line, bar über die Zeit</b>: Eine Zahl wird an die Reihe angehängt.</li>
+                <li><b>bar mit Kategorien, pie, donut</b>: Ein Array ersetzt die Werte, einer pro Kategorie.</li>
+                <li><b>table</b>: ein Array von Zeilen; eine Zeile ist ein Array von Zellen.</li>
+                <li><b>timeline</b>: Eine Zustands-ID beginnt ein neues Segment.</li>
+                <li><b>jede Kachel</b>: Ein Objekt setzt die Felder, die es nennt, zum Beispiel
+                    <code>{"value": 79.3, "status": "warning", "subtext": "..."}</code>; <code>null</code> entfernt ein Feld.</li>
+            </ul>
+        </dd>
+        <dt class="optional">timestamp <span class="property-type">number | string</span></dt>
+        <dd>Zeitpunkt eines Punkts oder Segments, in Millisekunden oder ISO 8601. Standard: jetzt.</dd>
+        <dt class="optional">series <span class="property-type">string</span></dt>
+        <dd>Name der Reihe, in die geschrieben wird. Standard: die erste.</dd>
+        <dt class="optional">lane <span class="property-type">string</span></dt>
+        <dd>Name der Timeline-Spur. Standard: die erste.</dd>
+    </dl>
+    <p>Ohne <code>msg.topic</code> darf <code>msg.payload</code> ein Objekt aus Kachel-IDs und Werten sein
+       (<code>{"t_oee": 79.3, "t_shift": 580}</code>) oder ein ganzes View-Dokument, das den Stand ersetzt.</p>
+
+    <h3>Ausgang</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>Eine Zusammenfassung jedes Uploads, zu dem dieser Node beigetragen hat: View, Schlüsselversion, notify,
+            Größen, Statuscode. Kein Secret, kein Envelope.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>Werte werden gesammelt und höchstens einmal pro Intervall der View gesendet. Der Status einer Kachel ist dein
+       Urteil: Die App rechnet ihn nicht aus. Mit dem Haken <i>Status aus Bands</i> in der View wird er abgeleitet.</p>
+    <p>Ein Wert, der nicht zu seiner Kachel passt, wird abgelehnt und an einen Catch-Node gemeldet. Die View bleibt, wie sie war.</p>
+    <p>Kommt kein Wert, wird nichts gesendet. Die App zeigt die View dann als veraltet, sobald ihre Zeit abgelaufen ist.</p>
+</script>

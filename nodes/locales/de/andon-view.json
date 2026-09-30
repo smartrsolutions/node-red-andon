@@ -1,0 +1,46 @@
+{
+    "andon-view": {
+        "label": {
+            "name": "Name",
+            "view": "View-ID",
+            "kv": "Key-Version",
+            "writeSecret": "Write-Secret",
+            "contentKey": "Content-Key",
+            "importEnv": ".env importieren",
+            "template": "Vorlage",
+            "importTemplate": "Vorlage importieren",
+            "tiles": "Kacheln",
+            "interval": "Intervall",
+            "staleAfter": "Veraltet nach",
+            "notify": "Geräte wecken",
+            "window": "Zeitreihen",
+            "seconds": "s",
+            "points": "Punkte",
+            "auto": "automatisch"
+        },
+        "notify": {
+            "auto": "wenn sich ein Status ändert",
+            "always": "bei jedem Upload",
+            "never": "nie"
+        },
+        "hint": {
+            "env": "Die .env aus dem Andon-Konfigurator. Übernommen werden View, Write-Secret, Content-Key und Schlüsselversion; das Invite-Secret wird verworfen, eine Datenquelle koppelt keine Geräte.",
+            "template": "Ein View-Dokument aus dem Konfigurator. Es legt Titel, Icons, Einheiten, Ranges und Bands fest; seine Werte sind Startwerte.",
+            "tiles": "msg.topic ist die Kachel-ID. Ein Haken leitet den Status der Kachel aus ihren Bands ab.",
+            "derive": "Status aus Bands",
+            "interval": "Höchstens ein Upload pro Intervall, mindestens 10 s.",
+            "staleAfter": "Leer: dreimal das Intervall.",
+            "window": "Die letzten n Punkte einer Reihe behalten und nichts, was älter ist als das Alter. 0 schaltet eine Grenze ab.",
+            "age": "max. Alter"
+        },
+        "import": {
+            "pick": "Die Datei enthält mehrere Views. Welche?",
+            "none": "Keine vollständige View in dieser Datei.",
+            "problems": "Nicht übernommen, fehlerhaft: __list__",
+            "otherRelay": "Diese .env gehört zu __url__, dieses Node-RED spricht mit __relay__. Nicht importiert.",
+            "done": "View __view__ importiert (Key-Version __kv__).",
+            "templateOk": "Vorlage gültig: __count__ Kacheln.",
+            "templateBad": "Die Vorlage ist nicht gültig:"
+        }
+    }
+}

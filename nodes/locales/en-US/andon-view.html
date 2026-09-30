@@ -1,0 +1,18 @@
+<script type="text/html" data-help-name="andon-view">
+    <p>One Andon view: where the values go, and which tiles there are.</p>
+    <h3>Setting up</h3>
+    <ol>
+        <li>Design the tiles in the <a href="https://andon.app/en/configurator" target="_blank" rel="noopener">Andon configurator</a> and create the view there.</li>
+        <li>Download the <code>.env</code> and the template, and import both here.</li>
+        <li>Scan the configurator's QR code with the Andon app.</li>
+    </ol>
+    <p>Write secret and content key are stored as Node-RED credentials: encrypted, and never part of an exported flow.
+       The content key never leaves Node-RED. After a rotation in the configurator, import the new <code>.env</code>.</p>
+    <h3>Settings</h3>
+    <dl class="message-properties">
+        <dt>Interval</dt><dd>At most one upload per interval, 10 s at least. The first change after a quiet spell goes out at once.</dd>
+        <dt>Stale after</dt><dd>How long the app trusts an upload. While values keep arriving, a heartbeat goes out at half this time, even if nothing changed.</dd>
+        <dt>Wake devices</dt><dd>By default only a changed status wakes the paired devices: every wake-up costs battery.</dd>
+        <dt>Time series</dt><dd>How many points, and how old, a series keeps when values are appended to it.</dd>
+    </dl>
+</script>

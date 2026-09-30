@@ -1,0 +1,33 @@
+<script type="text/javascript">
+    RED.nodes.registerType('andon-out', {
+        category: 'network',
+        color: '#F2B233',
+        defaults: {
+            name: { value: '' },
+            view: { value: '', type: 'andon-view', required: true },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'andon.svg',
+        align: 'right',
+        paletteLabel: 'andon out',
+        label: function () {
+            if (this.name) { return this.name; }
+            var view = RED.nodes.node(this.view);
+            return view ? 'andon ' + (view.name || view._def.label.call(view)) : 'andon out';
+        },
+        labelStyle: function () { return this.name ? 'node_label_italic' : ''; },
+        outputLabels: function () { return 'upload report'; },
+    });
+</script>
+
+<script type="text/html" data-template-name="andon-out">
+    <div class="form-row">
+        <label for="node-input-view"><i class="fa fa-th-large"></i> <span data-i18n="andon-out.label.view"></span></label>
+        <input type="text" id="node-input-view">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="andon-out.label.name"></span></label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>

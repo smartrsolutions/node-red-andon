@@ -1,0 +1,46 @@
+{
+    "andon-view": {
+        "label": {
+            "name": "Name",
+            "view": "View ID",
+            "kv": "Key version",
+            "writeSecret": "Write secret",
+            "contentKey": "Content key",
+            "importEnv": "Import .env",
+            "template": "Template",
+            "importTemplate": "Import template",
+            "tiles": "Tiles",
+            "interval": "Interval",
+            "staleAfter": "Stale after",
+            "notify": "Wake devices",
+            "window": "Time series",
+            "seconds": "s",
+            "points": "points",
+            "auto": "automatic"
+        },
+        "notify": {
+            "auto": "when a status changes",
+            "always": "on every upload",
+            "never": "never"
+        },
+        "hint": {
+            "env": "The .env from the Andon configurator. View, write secret, content key and key version are taken; the invite secret is dropped, a source does not pair devices.",
+            "template": "A view document from the configurator. It fixes titles, icons, units, ranges and bands; its values are start values.",
+            "tiles": "msg.topic is the tile ID. Tick a tile to derive its status from its bands.",
+            "derive": "status from bands",
+            "interval": "At most one upload per interval, 10 s at least.",
+            "staleAfter": "Empty: three times the interval.",
+            "window": "Keep the last n points of a series, and nothing older than the age. 0 switches a limit off.",
+            "age": "max. age"
+        },
+        "import": {
+            "pick": "The file holds several views. Which one?",
+            "none": "No complete view in this file.",
+            "problems": "Not taken, malformed: __list__",
+            "otherRelay": "This .env belongs to __url__; this Node-RED talks to __relay__. Not imported.",
+            "done": "Imported view __view__ (key version __kv__).",
+            "templateOk": "Template valid: __count__ tiles.",
+            "templateBad": "The template is not valid:"
+        }
+    }
+}

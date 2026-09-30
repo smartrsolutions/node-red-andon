@@ -1,0 +1,120 @@
+[
+    {
+        "id": "andon_ex_comment",
+        "type": "comment",
+        "name": "Andon: getting started",
+        "info": "Open the view \"Getting started\", import the .env from the Andon configurator (https://andon.app/en/configurator) and deploy. The simulator below feeds four tiles; replace it with your own sources. msg.topic is the tile ID.",
+        "x": 250,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "andon_ex_inject",
+        "type": "inject",
+        "name": "every 5 s",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "andon_ex_sim"
+            ]
+        ]
+    },
+    {
+        "id": "andon_ex_sim",
+        "type": "function",
+        "name": "Simulate production line",
+        "func": "// Simulates a line: a status, an OEE, an oven temperature and a timeline.\n// Replace this node with your own sources (MQTT, S7, Modbus, SQL ...):\n// msg.topic is the tile ID, msg.payload the value.\nconst now = Date.now();\nconst t = now / 60000;\nlet state = context.get('state') || 'run';\nif (Math.random() < (state === 'run' ? 0.05 : 0.4)) { state = state === 'run' ? 'fault' : 'run'; }\ncontext.set('state', state);\n\nconst running = state === 'run';\nconst oee = running ? 76 + 9 * Math.sin(t / 7) + Math.random() * 2 : 55 + Math.random() * 3;\nconst temp = 180 + 4 * Math.sin(t / 3) + Math.random();\nconst iso = (ms) => new Date(ms).toISOString().replace(/\\.\\d+Z$/, 'Z');\n\nreturn [[\n    { topic: 't_status', payload: { value: running ? 'Running' : 'Fault', status: running ? 'ok' : 'critical' } },\n    { topic: 't_oee', payload: Math.round(oee * 10) / 10 },\n    { topic: 't_temp', payload: Math.round(temp * 10) / 10 },\n    { topic: 't_history', payload: { from: iso(now - 2 * 3600000), to: iso(now) } },\n    { topic: 't_history', payload: state },\n]];",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 140,
+        "wires": [
+            [
+                "andon_ex_out"
+            ]
+        ]
+    },
+    {
+        "id": "andon_ex_out",
+        "type": "andon-out",
+        "name": "",
+        "view": "andon_ex_view",
+        "x": 560,
+        "y": 140,
+        "wires": [
+            [
+                "andon_ex_debug"
+            ]
+        ]
+    },
+    {
+        "id": "andon_ex_debug",
+        "type": "debug",
+        "name": "Upload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 780,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "andon_ex_catch",
+        "type": "catch",
+        "name": "refused values",
+        "scope": [
+            "andon_ex_out"
+        ],
+        "uncaught": false,
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "andon_ex_errors"
+            ]
+        ]
+    },
+    {
+        "id": "andon_ex_errors",
+        "type": "debug",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "error.message",
+        "targetType": "msg",
+        "x": 360,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "andon_ex_view",
+        "type": "andon-view",
+        "name": "Getting started",
+        "viewId": "",
+        "kv": 1,
+        "template": "{\n  \"id\": \"6b1d2f0e-4c3a-4e8b-9a51-2d7c8e0f1a36\",\n  \"schemaVersion\": 1,\n  \"name\": \"Getting started\",\n  \"generatedAt\": \"2026-09-29T08:00:00Z\",\n  \"staleAfterSec\": 90,\n  \"tiles\": [\n    {\n      \"id\": \"t_status\",\n      \"view\": \"label\",\n      \"title\": \"Line 1\",\n      \"titleShort\": \"Line\",\n      \"status\": \"ok\",\n      \"value\": \"Running\",\n      \"subtext\": \"Simulated in Node-RED\"\n    },\n    {\n      \"id\": \"t_oee\",\n      \"view\": \"gauge\",\n      \"title\": \"OEE\",\n      \"status\": \"ok\",\n      \"value\": 82,\n      \"unit\": \"%\",\n      \"decimals\": 1,\n      \"range\": {\n        \"min\": 0,\n        \"max\": 100\n      },\n      \"target\": 85,\n      \"bands\": [\n        {\n          \"to\": 60,\n          \"status\": \"critical\"\n        },\n        {\n          \"to\": 80,\n          \"status\": \"warning\"\n        },\n        {\n          \"to\": 100,\n          \"status\": \"ok\"\n        }\n      ]\n    },\n    {\n      \"id\": \"t_temp\",\n      \"view\": \"line\",\n      \"title\": \"Oven temperature\",\n      \"titleShort\": \"Oven\",\n      \"value\": 180,\n      \"unit\": \"°C\",\n      \"decimals\": 1,\n      \"series\": [\n        {\n          \"name\": \"Oven\",\n          \"samples\": [\n            [\n              \"2026-09-29T07:59:00Z\",\n              179.5\n            ],\n            [\n              \"2026-09-29T07:59:30Z\",\n              180.2\n            ],\n            [\n              \"2026-09-29T08:00:00Z\",\n              180\n            ]\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_history\",\n      \"view\": \"timeline\",\n      \"title\": \"State today\",\n      \"titleShort\": \"State\",\n      \"from\": \"2026-09-29T06:00:00Z\",\n      \"to\": \"2026-09-29T08:00:00Z\",\n      \"states\": [\n        {\n          \"id\": \"run\",\n          \"label\": \"Running\",\n          \"status\": \"ok\"\n        },\n        {\n          \"id\": \"fault\",\n          \"label\": \"Fault\",\n          \"status\": \"critical\"\n        }\n      ],\n      \"lanes\": [\n        {\n          \"name\": \"Line 1\",\n          \"segments\": [\n            [\n              \"2026-09-29T06:00:00Z\",\n              \"run\"\n            ]\n          ]\n        }\n      ]\n    }\n  ]\n}",
+        "intervalSec": 30,
+        "staleAfterSec": "",
+        "notify": "auto",
+        "windowPoints": 60,
+        "windowAgeSec": 0,
+        "derive": [
+            "t_oee"
+        ]
+    }
+]
