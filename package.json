@@ -1,6 +1,6 @@
 {
   "name": "@smartrsolutions/node-red-andon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Send values from Node-RED to the Andon app for iPhone: end-to-end encrypted tiles, fed by msg.topic.",
   "keywords": [
     "node-red",

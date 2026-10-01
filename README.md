@@ -20,15 +20,35 @@ Two nodes:
 
 ## Getting started
 
+### Try the example
+
+The example brings its own four tiles and a simulator that feeds them, so all it
+needs from you are the keys of a view.
+
+1. **Install** this package: *Manage palette → Install*, search for `andon`.
+2. **Create a view** in the [configurator](https://andon.app/en/configurator) and
+   download the `.env`. Leave the tiles alone, and do not download the template:
+   the example has its own.
+3. **Pair** your iPhone: scan the configurator's QR code with the Andon app.
+4. **Import the example**: *Import → Examples → @smartrsolutions/node-red-andon → Andon basics*.
+5. **Open the view** `Getting started` (the pencil next to *View* in `andon out`)
+   and click *Import .env*. Only that one: the simulator sends to the tiles the
+   example came with, and another template would replace them.
+6. **Deploy.** The node turns green, and the tiles appear on your iPhone.
+
+### Your own tiles
+
 1. **Design** your tiles in the [configurator](https://andon.app/en/configurator) and
    create the view there. Download the `.env` and the template.
 2. **Pair** your iPhone: scan the configurator's QR code with the Andon app.
-3. **Install** this package: *Manage palette → Install*, search for `andon`.
-4. **Import the example**: *Import → Examples → @smartrsolutions/node-red-andon → Andon basics*.
-5. **Open the view** `Getting started`, click *Import .env* and *Import template*,
-   then deploy. The node turns green, and the tiles appear on your iPhone.
+3. **Add an `andon out`** node to a flow. Next to *View*, add a new view and open it
+   with the pencil, then click *Import .env* and *Import template*.
+4. **Connect your sources** to the node: `msg.topic` is the tile ID, `msg.payload`
+   the value.
+5. **Deploy.**
 
-Then replace the simulator in the example with your own sources.
+Coming from the example, the step is the same: replace its simulator with your own
+sources, and import your template into its view once the tile IDs are yours.
 
 ## Messages
 
