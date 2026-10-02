@@ -4,6 +4,7 @@
             "name": "Name",
             "view": "View-ID",
             "kv": "Key-Version",
+            "envPrefix": "Aus der Umgebung",
             "writeSecret": "Write-Secret",
             "contentKey": "Content-Key",
             "importEnv": ".env importieren",
@@ -25,6 +26,8 @@
         },
         "hint": {
             "env": "Die .env aus dem Andon-Konfigurator. Übernommen werden View, Write-Secret, Content-Key und Schlüsselversion; das Invite-Secret wird verworfen, eine Datenquelle koppelt keine Geräte.",
+            "envPrefix": "Leer: es gelten die Werte oben. ANDON_ oder ANDON_CLOUD_: was oben leer ist, wird aus <Prefix>VIEW, <Prefix>WRITE_SECRET, <Prefix>CONTENT_KEY, <Prefix>KEY_VERSION und <Prefix>URL gelesen - für ein Node-RED, das sein Container konfiguriert.",
+            "kv": "Leer: 1, mit gesetztem Prefix <Prefix>KEY_VERSION.",
             "template": "Ein View-Dokument aus dem Konfigurator. Es legt Titel, Icons, Einheiten, Ranges und Bands fest; seine Werte sind Startwerte.",
             "tiles": "msg.topic ist die Kachel-ID. Ein Haken leitet den Status der Kachel aus ihren Bands ab.",
             "derive": "Status aus Bands",

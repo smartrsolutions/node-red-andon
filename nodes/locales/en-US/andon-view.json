@@ -4,6 +4,7 @@
             "name": "Name",
             "view": "View ID",
             "kv": "Key version",
+            "envPrefix": "From the environment",
             "writeSecret": "Write secret",
             "contentKey": "Content key",
             "importEnv": "Import .env",
@@ -25,6 +26,8 @@
         },
         "hint": {
             "env": "The .env from the Andon configurator. View, write secret, content key and key version are taken; the invite secret is dropped, a source does not pair devices.",
+            "envPrefix": "Empty: the values above are used. ANDON_ or ANDON_CLOUD_: whatever is empty above is read from <prefix>VIEW, <prefix>WRITE_SECRET, <prefix>CONTENT_KEY, <prefix>KEY_VERSION and <prefix>URL - for a Node-RED that is configured by its container.",
+            "kv": "Empty: 1, or <prefix>KEY_VERSION with a prefix set.",
             "template": "A view document from the configurator. It fixes titles, icons, units, ranges and bands; its values are start values.",
             "tiles": "msg.topic is the tile ID. Tick a tile to derive its status from its bands.",
             "derive": "status from bands",

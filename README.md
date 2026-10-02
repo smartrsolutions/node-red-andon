@@ -97,11 +97,39 @@ The status of a tile (`ok`, `warning`, `critical`, `stale`) is your judgement: t
 app does not compute it from the value. Send it with the value, or tick
 *status from bands* for a tile in the view to have it derived from its bands.
 
+## From the environment, for a container
+
+A Node-RED in a container often has no editor to type a secret into, and no
+credential store worth writing to. Set **From the environment** on the view to a
+prefix — `ANDON_`, or `ANDON_CLOUD_` for a second view in the same environment —
+and everything the dialog leaves empty is read from there instead:
+
+| Variable | What for |
+|---|---|
+| `<prefix>VIEW` | the view ID |
+| `<prefix>WRITE_SECRET` | the write secret |
+| `<prefix>CONTENT_KEY` | the content key, base64 |
+| `<prefix>KEY_VERSION` | the key version, 1 if unset |
+| `<prefix>URL` | the relay, if it is not the public one |
+
+Those are the names the `.env` from the configurator already uses, so it can be
+handed to the container unedited. A prefix has to be upper case and end in an
+underscore, and it replaces the leading `ANDON_` of each name.
+
+What the view holds always wins; the environment fills in the rest. A variable
+nobody set makes the view say which one it was, and nothing is uploaded until it is
+there. The flow file then carries variable *names* and no secret at all — which is
+what makes a flow safe to commit, copy between machines and hand to a deployment.
+
+The template stays in the flow: it is titles, icons, units and ranges, not a
+secret.
+
 ## Security
 
 - Write secret and content key are Node-RED credentials: stored encrypted in
   `flows_cred.json` and never part of an exported flow. Set `credentialSecret` in
-  your `settings.js`.
+  your `settings.js`. Or keep them out of Node-RED's files entirely and hand them
+  in through the environment, see above.
 - The content key never leaves Node-RED. The write secret is sent only in the
   `Authorization` header of the upload.
 - The output of `andon out` is a summary (sizes, status code, `notify`), never the

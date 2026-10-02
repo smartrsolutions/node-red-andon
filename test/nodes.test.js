@@ -165,8 +165,10 @@ test('the dialog can check a template before deploying it', async () => {
     assert.equal(good.body.tiles.length, 14);
     assert.ok(good.body.tiles.find((t) => t.id === 't_oee').bands);
 
+    // A gauge without a range: picked by ID, so reordering the template's tiles
+    // cannot turn this into a document that happens to be valid.
     const broken = template();
-    delete broken.tiles[1].range;
+    delete broken.tiles.find((tile) => tile.id === 't_oee').range;
     const bad = await helper.request().post('/andon-view/check').send({ template: JSON.stringify(broken) }).expect(200);
     assert.equal(bad.body.ok, false);
     assert.ok(bad.body.errors.length > 0);

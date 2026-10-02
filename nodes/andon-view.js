@@ -7,6 +7,11 @@
  * flows_cred.json, encrypted with credentialSecret, and leaves them out of every
  * flow export. The content key never leaves this process; the write secret only
  * goes into the Authorization header to the relay.
+ *
+ * They may also come from the environment instead, under a prefix of this view's
+ * own (lib/env.js) - for a Node-RED in a container, which has no editor to type
+ * them into and no credential store worth writing to. What the dialog holds always
+ * wins; the environment fills in what it left empty.
  */
 
 const crypto = require('crypto');
@@ -14,6 +19,7 @@ const { ViewRuntime } = require('../lib/view');
 const { parseKey, VIEW_ID, WRITE_SECRET } = require('../lib/seal');
 const { validate, summary } = require('../lib/validate');
 const relay = require('../lib/relay');
+const envFile = require('../lib/env');
 
 const STATE_KEY = 'andonState';
 const MAX_BODY = 1024 * 1024;
@@ -32,10 +38,28 @@ module.exports = function (RED) {
         const creds = node.credentials || {};
         let template = null;
         let key = null;
+        // With an environment prefix set, anything the dialog leaves empty is read
+        // from the environment instead (lib/env.js). What is configured here always
+        // wins, so a prefix is a fallback and never a surprise.
+        const prefix = String(config.envPrefix || '').trim();
+        const fromEnv = (suffix) => (prefix ? envFile.pick(prefix, suffix) : '');
+        const orEnv = (value, suffix) => (value || fromEnv(suffix));
+        // "set it in the view, or in ANDON_CLOUD_VIEW" - a message about a missing
+        // value has to name the variable that is actually read, not a generic one.
+        const says = (suffix) => (prefix
+            ? 'set it in the view, or in ' + envFile.name(prefix, suffix)
+            : 'import the .env from the configurator');
+        let writeSecret = '';
         try {
-            if (!VIEW_ID.test(node.viewId)) { throw new Error('view ID missing or malformed: import the .env from the configurator'); }
-            if (!WRITE_SECRET.test(String(creds.writeSecret || '').trim())) { throw new Error('write secret missing or malformed: import the .env from the configurator'); }
-            key = parseKey(creds.contentKey);
+            envFile.checkPrefix(prefix);
+            node.viewId = orEnv(node.viewId, 'VIEW');
+            node.kv = Number(config.kv || fromEnv('KEY_VERSION')) || 1;
+            writeSecret = String(orEnv(String(creds.writeSecret || '').trim(), 'WRITE_SECRET'));
+            if (!VIEW_ID.test(node.viewId)) { throw new Error('view ID missing or malformed: ' + says('VIEW')); }
+            if (!WRITE_SECRET.test(writeSecret)) { throw new Error('write secret missing or malformed: ' + says('WRITE_SECRET')); }
+            const contentKey = orEnv(String(creds.contentKey || '').trim(), 'CONTENT_KEY');
+            if (!contentKey) { throw new Error('content key missing: ' + says('CONTENT_KEY')); }
+            key = parseKey(contentKey);
             if (!Number.isInteger(node.kv) || node.kv < 1) { throw new Error('key version must be an integer of 1 or more'); }
             if (config.template && String(config.template).trim()) {
                 template = JSON.parse(config.template);
@@ -58,8 +82,14 @@ module.exports = function (RED) {
         }
 
         if (!node.problem) {
-            const base = relay.relayUrl();
-            if (base !== relay.DEFAULT_RELAY) { node.log('ANDON_RELAY_URL is set: uploads go to ' + base); }
+            // <PREFIX>URL is this view's own address and wins over the global
+            // ANDON_RELAY_URL: one environment can then hold several views on
+            // several relays, which is what the CLI's .env files look like.
+            const own = prefix ? envFile.pick(prefix, 'URL').replace(/\/+$/, '') : '';
+            const base = own || relay.relayUrl();
+            if (base !== relay.DEFAULT_RELAY) {
+                node.log((own ? envFile.name(prefix, 'URL') : 'ANDON_RELAY_URL') + ' is set: uploads go to ' + base);
+            }
             node.runtime = new ViewRuntime({
                 view: node.viewId,
                 kv: node.kv,
@@ -71,7 +101,7 @@ module.exports = function (RED) {
                 derive: new Set(Array.isArray(config.derive) ? config.derive : []),
                 template,
                 restored,
-                put: (envelope) => relay.put({ base, view: node.viewId, writeSecret: String(creds.writeSecret).trim(), envelope }),
+                put: (envelope) => relay.put({ base, view: node.viewId, writeSecret, envelope }),
                 onEvent: (event) => {
                     if (event.type === 'sent') {
                         try { node.context().set(STATE_KEY, { stamp, doc: event.doc, fingerprint: event.fingerprint, live: event.live }); } catch (e) { /* ignore */ }

@@ -60,8 +60,11 @@
         category: 'config',
         defaults: {
             name: { value: '' },
-            viewId: { value: '', required: true, validate: RED.validators.regex(/^vw_[a-z2-7]{26}$/) },
-            kv: { value: 1, required: true, validate: function (v) { return Number(v) >= 1 && Math.floor(Number(v)) === Number(v); } },
+            viewId: { value: '', required: false, validate: function (v) { return !v || /^vw_[a-z2-7]{26}$/.test(v); } },
+            envPrefix: { value: '', validate: function (v) { return !v || /^[A-Z][A-Z0-9_]*_$/.test(v); } },
+            // Empty means 1, or <prefix>KEY_VERSION when a prefix is set - a field
+            // that always holds 1 would make that variable unreachable.
+            kv: { value: '', validate: function (v) { return v === '' || (Number(v) >= 1 && Math.floor(Number(v)) === Number(v)); } },
             template: { value: '' },
             intervalSec: { value: 30, validate: function (v) { return v === '' || Number(v) >= 10; } },
             staleAfterSec: { value: '' },
@@ -181,7 +184,13 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-kv"><i class="fa fa-key"></i> <span data-i18n="andon-view.label.kv"></span></label>
-        <input type="number" id="node-config-input-kv" min="1" step="1" style="width:80px">
+        <input type="number" id="node-config-input-kv" min="1" step="1" style="width:80px" placeholder="1">
+        <span class="form-tips" style="margin-left:8px" data-i18n="andon-view.hint.kv"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-envPrefix"><i class="fa fa-terminal"></i> <span data-i18n="andon-view.label.envPrefix"></span></label>
+        <input type="text" id="node-config-input-envPrefix" spellcheck="false" autocomplete="off" placeholder="ANDON_" style="width:200px">
+        <div class="form-tips" style="margin-top:6px" data-i18n="andon-view.hint.envPrefix"></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-writeSecret"><i class="fa fa-lock"></i> <span data-i18n="andon-view.label.writeSecret"></span></label>
