@@ -128,6 +128,20 @@ test('a view without credentials says so on every node and sends nothing', async
     assert.equal(requests.length, 0);
 });
 
+test('a view without a template says so on the canvas right after the deploy', async () => {
+    await helper.load([viewNode, outNode], flow({ template: '' }), credentials);
+    const out = helper.getNode('o1');
+    const shown = out.status.getCalls().filter((c) => c.thisValue === out).map((c) => c.args[0]);
+    assert.deepEqual(shown[shown.length - 1], { fill: 'yellow', shape: 'ring', text: 'andon-out.status.noTemplate' });
+});
+
+test('a view with a template shows nothing until the first upload', async () => {
+    await helper.load([viewNode, outNode], flow(), credentials);
+    const out = helper.getNode('o1');
+    const shown = out.status.getCalls().filter((c) => c.thisValue === out).map((c) => c.args[0]);
+    assert.deepEqual(shown[shown.length - 1], {});
+});
+
 test('401 is reported to the node whose value was in the upload, with a hint', async () => {
     answer = { status: 401, body: '{"error":"unauthorized","message":"bad secret"}' };
     await helper.load([viewNode, outNode], flow(), credentials);

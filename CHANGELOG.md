@@ -3,6 +3,51 @@
 Versions follow [semantic versioning](https://semver.org): a major version may
 break an existing flow, and its entry says what to change.
 
+## 1.2.0
+
+- **A second example, All tile kinds**: a view with one tile of every kind - two
+  labels, a gauge, a progress, a line of samples and one in the step form, bars over
+  time and over categories, a pie, a donut, a table and a timeline with two lanes -
+  in neutral names and values, and the function node *Insert example flow* writes
+  for it, with every form every tile takes. *Import → Examples →
+  @smartrsolutions/node-red-andon → All tile kinds.*
+- **The dialog of andon out shows what each tile takes.** Below the view, every tile
+  of its template with every form it accepts and an example of each: for a line a
+  number, a number at `msg.timestamp`, `[timestamp, value]` pairs, a whole series
+  of samples and one in the step form; for a bar with categories one number per
+  category, new categories with their values, a verdict per bar; and so on. What a
+  tile takes depends on its kind and its template, and until now the only place that
+  said so was the README.
+- **Insert example flow**, a button in the same dialog, puts an inject and a
+  function node named *Andon example* in front of the node, wired to it. The code
+  holds every form of every tile as a `node.send`: the first one live, every 30 s,
+  the others commented out, ready to swap in. It is English whatever language the
+  editor speaks.
+- **An array of `[timestamp, value]` pairs replaces a series in the step form too.**
+  It was refused before, because the pairs landed next to the points. A whole series
+  sent as an array or an object also counts as real data now: the next number is
+  appended to it instead of replacing it as if it were the template's start values.
+- **A refused value says what the tile takes**, in English, after what was wrong:
+  `tile "t_takt" needs a number, got "hoch". A line takes a number (is appended to
+  the series, at the time it arrives) or an array of [timestamp, value] pairs
+  (replaces the series; msg.series picks which)`. A
+  document the schema refuses gets the same sentence for the tile the message broke.
+- **An incomplete view shows on the canvas.** A view with neither a view ID nor an
+  environment prefix - the `.env` was never imported - is marked as not configured,
+  and so is every andon out on it, before a deploy rather than with the first value.
+  A view without a template is no error, since a source may send whole view
+  documents, but its andon out nodes say *no template* once deployed, and the view's
+  dialog asks for the template right after the `.env` is imported.
+- **A broken series says what is broken.** A series has one of two forms, samples or
+  `start`/`stepSec`/`points`, and a refused one was reported against both: a series
+  whose only fault was a `start` from `Date.toString()` read "missing required field
+  samples; unknown field "start"; unknown field "stepSec"", with the cause hidden
+  behind "+3 more". The error now names the form the series uses, and only its faults:
+  `/series/0/start: invalid date-time`.
+- **The README and the node's help say what an array does to a line**: an array of
+  `[timestamp, value]` pairs replaces the series, as it always did. The README has an
+  example of a whole series in the step form.
+
 ## 1.1.0
 
 - **A view can take its values from the environment.** The new field *From the

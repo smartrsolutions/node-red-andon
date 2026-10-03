@@ -44,11 +44,21 @@ needs from you are the keys of a view.
 3. **Add an `andon out`** node to a flow. Next to *View*, add a new view and open it
    with the pencil, then click *Import .env* and *Import template*.
 4. **Connect your sources** to the node: `msg.topic` is the tile ID, `msg.payload`
-   the value.
+   the value. The node's dialog lists what each tile takes, and *Insert example
+   flow* puts a source in front of it that sends an example value to every tile.
 5. **Deploy.**
+
+Without the `.env`, the node is marked as not configured before you deploy.
+Without the template, it shows *no template* once deployed: a view knows its tiles
+from the template, and without one it takes a whole view document only.
 
 Coming from the example, the step is the same: replace its simulator with your own
 sources, and import your template into its view once the tile IDs are yours.
+
+A second example, *All tile kinds*, has one tile of every kind and a function node
+that lists every form each of them takes: *Import → Examples →
+@smartrsolutions/node-red-andon → All tile kinds*, then the `.env` as above. It is
+what *Insert example flow* writes, for a view with every kind in it.
 
 ## Messages
 
@@ -59,13 +69,39 @@ depends on the tile:
 |---|---|---|
 | label | number or text | replaces the value |
 | gauge, progress, donut | number | replaces the value |
-| line, bar over time | number | appended to the series (`msg.timestamp`, `msg.series` optional) |
-| bar with categories, pie, donut | array of numbers | replaces the values, one per category |
-| table | array of rows (a row is an array of cells) | replaces the rows |
-| timeline | state ID | starts a new segment (`msg.lane` optional) |
+| line, bar over time | number | appended to the series, now or at `msg.timestamp`; `msg.series` picks the series |
+| line, bar over time | array of `[timestamp, value]` pairs | replaces the series; `msg.series` picks which |
+| line, bar over time | `{series: [{name, samples}]}` | replaces every series |
+| line, bar over time | `{series: [{name, start, stepSec, points}]}` | replaces every series: a point every `stepSec` from `start` |
+| bar with categories, pie, donut | array of numbers, one per category | replaces the values; `msg.series` picks the series |
+| bar with categories, pie, donut | `{categories, series: [{name, values}]}` | replaces categories and values together |
+| bar with categories, one series | `{series: [{name, values, statuses}]}` | a verdict per bar: `ok`, `warning`, `critical` or `null` |
+| table | array of rows, a row an array of cells | replaces the rows |
+| table | array of `{cells, status}` | replaces the rows, with a status per row |
+| timeline | state ID | starts a new segment, now or at `msg.timestamp`; `msg.lane` picks the lane |
+| timeline | `{from, to}` | moves the time axis; what lies before `from` is trimmed |
 | any tile | object, e.g. `{"value": 79.3, "status": "warning"}` | sets the named fields; `null` removes one |
 
+A number cannot be appended to a series in the step form: it has no timestamp of
+its own. Send pairs or a whole series instead; either replaces the step form.
+
+The dialog of `andon out` lists these forms for the tiles of your view, and *Insert
+example flow* writes all of them into a function node, one `node.send` each.
+
 Numbers may arrive as text (`"79.3"`), as MQTT and most PLC nodes deliver them.
+
+Timestamps are ISO 8601 in UTC, as `Date.toISOString()` writes them;
+`Date.toString()` is refused. A whole history at a fixed step - hourly values since
+midnight, say - is one series in the step form:
+
+```js
+const midnight = new Date();
+midnight.setHours(0, 0, 0, 0);
+msg.topic = 't_visitors';
+msg.payload = { series: [{ name: 'Today', start: midnight.toISOString(), stepSec: 3600, points: [12, 30, 41] }] };
+```
+
+A series has at least one point.
 
 Without `msg.topic`:
 
@@ -74,8 +110,9 @@ msg.payload = { t_oee: 79.3, t_shift: 580 };   // several tiles at once
 msg.payload = { id: "…", tiles: [ … ] };         // a whole view document, replaces the state
 ```
 
-A value that does not fit its tile is refused with an error a Catch node receives.
-The view stays as it was, so one bad value never blocks the others.
+A value that does not fit its tile is refused with an error a Catch node receives,
+and the error says what the tile takes. The view stays as it was, so one bad value
+never blocks the others.
 
 The first real value of a series or timeline lane replaces the points the
 template came with: those are the configurator's start values, not measurements.

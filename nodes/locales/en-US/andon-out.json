@@ -2,7 +2,10 @@
     "andon-out": {
         "label": {
             "name": "Name",
-            "view": "View"
+            "view": "View",
+            "tiles": "Tiles",
+            "categories": "categories",
+            "example": "Insert example flow"
         },
         "status": {
             "noView": "no view selected",
@@ -10,7 +13,94 @@
             "sent": "sent __time__",
             "sentNext": "sent __time__ · next in __sec__ s",
             "heartbeat": "heartbeat __time__",
-            "throttled": "__time__ throttled, retrying"
+            "throttled": "__time__ throttled, retrying",
+            "noTemplate": "no template: waits for a whole view document"
+        },
+        "hint": {
+            "tiles": "What msg.payload may be for each tile of the view; msg.topic is the tile ID. Every tile also takes an object of fields, e.g. {\"value\": 79.3, \"status\": \"warning\"}; null removes one.",
+            "noTemplate": "The view has no template, so its tiles are unknown here. Import the template in the view; without one, the node only takes a whole view document.",
+            "example": "Adds an inject and a function node in front of this node that send an example value to every tile every 30 s; every other form of each tile is there too, commented out."
+        },
+        "example": {
+            "done": "Example flow inserted to the left of this node. Deploy to send it."
+        },
+        "accepts": {
+            "text": {
+                "payload": "a text or a number",
+                "effect": "replaces the value"
+            },
+            "number": {
+                "payload": "a number",
+                "effect": "replaces the value"
+            },
+            "append": {
+                "payload": "a number",
+                "effect": "is appended to the series, at the time it arrives"
+            },
+            "appendAt": {
+                "payload": "a number with msg.timestamp",
+                "effect": "is appended at that time, in milliseconds or ISO 8601"
+            },
+            "appendTo": {
+                "payload": "a number with msg.series",
+                "effect": "is appended to the series of that name"
+            },
+            "pairs": {
+                "payload": "an array of [timestamp, value] pairs",
+                "effect": "replaces the series; msg.series picks which"
+            },
+            "samples": {
+                "payload": "an object {series: [{name, samples}]}",
+                "effect": "replaces every series"
+            },
+            "steps": {
+                "payload": "an object {series: [{name, start, stepSec, points}]}",
+                "effect": "replaces every series: a point every stepSec from start, in UTC"
+            },
+            "values": {
+                "payload": "an array of numbers, one per category",
+                "effect": "replaces the values; categories: __count__"
+            },
+            "valuesTo": {
+                "payload": "an array of numbers with msg.series",
+                "effect": "replaces the values of the series of that name"
+            },
+            "categories": {
+                "payload": "an object {categories, series}",
+                "effect": "replaces the categories and their values together"
+            },
+            "statuses": {
+                "payload": "an object {series: [{name, values, statuses}]}",
+                "effect": "a verdict per bar: ok, warning, critical or null"
+            },
+            "rows": {
+                "payload": "an array of rows, each an array of cells",
+                "effect": "replaces the rows; columns: __count__"
+            },
+            "rowStatus": {
+                "payload": "an array of {cells, status}",
+                "effect": "replaces the rows, with a status per row"
+            },
+            "state": {
+                "payload": "a state ID (__states__)",
+                "effect": "starts a new segment, at the time it arrives"
+            },
+            "stateAt": {
+                "payload": "a state ID with msg.timestamp",
+                "effect": "starts the segment at that time"
+            },
+            "stateLane": {
+                "payload": "a state ID with msg.lane",
+                "effect": "starts a segment in the lane of that name"
+            },
+            "window": {
+                "payload": "an object {from, to}",
+                "effect": "moves the time axis; what lies before from is trimmed"
+            },
+            "fields": {
+                "payload": "an object of fields, e.g. {\"status\": \"warning\"}",
+                "effect": "sets them; null removes one"
+            }
         }
     }
 }

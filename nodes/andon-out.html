@@ -1,4 +1,97 @@
+<script src="resources/@smartrsolutions/node-red-andon/accepts.js"></script>
+
 <script type="text/javascript">
+(function () {
+    // Messages of this node set: in the editor, RED._ needs the namespace spelled out.
+    function t(key, vars) { return RED._('@smartrsolutions/node-red-andon/andon-out:' + key, vars); }
+
+    // The wording of a form, in the editor's language; the English of
+    // resources/accepts.js where a translation is missing.
+    function words(f, part) {
+        var key = 'andon-out.accepts.' + f.key + '.' + part;
+        var text = t(key, f.params);
+        if (text !== key) { return text; }
+        return window.AndonAccepts.TEXT[f.key][part].replace(/__(\w+)__/g, function (m, name) {
+            return f.params[name] === undefined ? m : String(f.params[name]);
+        });
+    }
+
+    // The further message properties a form needs, one string each.
+    function extras(f, render) {
+        return Object.keys(f.msg).map(function (name) { return render(name, f.msg[name]); });
+    }
+
+    function templateOf(viewId) {
+        var view = viewId && viewId !== '_ADD_' ? RED.nodes.node(viewId) : null;
+        if (!view || !view.template) { return null; }
+        try {
+            var doc = JSON.parse(view.template);
+            return doc && Array.isArray(doc.tiles) && doc.tiles.length ? doc : null;
+        } catch (e) { return null; }
+    }
+
+    function short(value) {
+        var s = JSON.stringify(value);
+        return s.length > 90 ? s.slice(0, 87) + '…' : s;
+    }
+
+    // Tile IDs and titles come from a file the user picked: text, never markup.
+    function renderTiles(doc) {
+        var list = $('#andon-out-tiles').empty();
+        $('#andon-out-example').prop('disabled', !doc);
+        if (!doc) { list.append($('<div class="andon-empty">').text(t('andon-out.hint.noTemplate'))); return; }
+        doc.tiles.forEach(function (tile) {
+            var box = $('<div class="andon-tile">');
+            var head = $('<div class="andon-head">');
+            head.append($('<code>').text(tile.id));
+            head.append($('<span class="andon-kind">').text(tile.view + (Array.isArray(tile.categories) ? ' · ' + t('andon-out.label.categories') : '')));
+            head.append($('<span class="andon-title">').text(tile.title || ''));
+            box.append(head);
+            // Every tile takes an object of fields; the hint above says so once.
+            window.AndonAccepts.forms(tile).filter(function (f) { return f.key !== 'fields'; }).forEach(function (f) {
+                var row = $('<div class="andon-form">');
+                row.append($('<code>').text(short(f.example) + extras(f, function (name, v) {
+                    return ' · msg.' + name + ' = ' + JSON.stringify(v.example);
+                }).join('')));
+                row.append($('<span>').text(words(f, 'payload') + ' – ' + words(f, 'effect')));
+                box.append(row);
+            });
+            list.append(box);
+        });
+    }
+
+    // An inject every 30 s into a function node into this andon out, left of it on
+    // the same tab: a working source to start from, not a snippet to paste.
+    function insertExample(outNode, doc) {
+        var inject = {
+            id: RED.nodes.id(), type: 'inject', z: outNode.z, name: '', props: [], repeat: '30', crontab: '',
+            once: true, onceDelay: '1', topic: '', x: outNode.x - 520, y: outNode.y, wires: [[]],
+        };
+        var fn = {
+            id: RED.nodes.id(), type: 'function', z: outNode.z, name: 'Andon example',
+            func: window.AndonAccepts.exampleCode(doc), outputs: 1, timeout: 0, noerr: 0, initialize: '', finalize: '', libs: [],
+            x: outNode.x - 280, y: outNode.y, wires: [[]],
+        };
+        inject.wires = [[fn.id]];
+        RED.view.importNodes([inject, fn], { generateIds: false, addFlow: false, touchImport: false });
+        // The import places the nodes where it likes and drops a wire to a node
+        // outside it: put both back next to this node and wire the function to it.
+        [inject, fn].forEach(function (n) {
+            var added = RED.nodes.node(n.id);
+            if (added) { added.x = n.x; added.y = n.y; added.dirty = true; }
+        });
+        var source = RED.nodes.node(fn.id);
+        var target = RED.nodes.node(outNode.id);
+        if (source && target) {
+            var link = { source: source, sourcePort: 0, target: target };
+            RED.nodes.addLink(link);
+            RED.history.push({ t: 'add', links: [link], dirty: RED.nodes.dirty() });
+            RED.nodes.dirty(true);
+        }
+        RED.view.redraw(true);
+        RED.notify(t('andon-out.example.done'), { type: 'success', timeout: 4000 });
+    }
+
     RED.nodes.registerType('andon-out', {
         category: 'network',
         color: '#F2B233',
@@ -18,10 +111,35 @@
         },
         labelStyle: function () { return this.name ? 'node_label_italic' : ''; },
         outputLabels: function () { return 'upload report'; },
+        oneditprepare: function () {
+            var node = this;
+            function update() { renderTiles(templateOf($('#node-input-view').val())); }
+            $('#node-input-view').on('change', update);
+            $('#andon-out-example').on('click', function () {
+                var doc = templateOf($('#node-input-view').val());
+                if (doc) { insertExample(node, doc); }
+            });
+            update();
+        },
     });
+})();
 </script>
 
 <script type="text/html" data-template-name="andon-out">
+    <style>
+        .andon-tiles { margin: 4px 0 0 0; max-height: 320px; overflow: auto; border: 1px solid var(--red-ui-form-input-border-color, #ccc); border-radius: 4px; }
+        .andon-tile { padding: 5px 8px; font-size: 12px; border-bottom: 1px solid var(--red-ui-secondary-border-color, #eee); }
+        .andon-tile:last-child { border-bottom: 0; }
+        .andon-head { display: flex; gap: 8px; align-items: baseline; }
+        .andon-head code { min-width: 110px; font-weight: 600; }
+        .andon-kind { opacity: .6; min-width: 60px; }
+        .andon-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .andon-form { display: flex; gap: 8px; align-items: baseline; padding: 1px 0 1px 16px; }
+        .andon-form code { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; flex-shrink: 0; }
+        .andon-form span { opacity: .8; }
+        .andon-empty { padding: 6px 8px; opacity: .6; }
+        .andon-hint { font-size: 12px; opacity: .75; margin: 4px 0 10px 0; }
+    </style>
     <div class="form-row">
         <label for="node-input-view"><i class="fa fa-th-large"></i> <span data-i18n="andon-out.label.view"></span></label>
         <input type="text" id="node-input-view">
@@ -30,4 +148,13 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="andon-out.label.name"></span></label>
         <input type="text" id="node-input-name">
     </div>
+    <div class="form-row" style="margin-bottom:0">
+        <label><i class="fa fa-list"></i> <span data-i18n="andon-out.label.tiles"></span></label>
+    </div>
+    <div class="andon-hint" data-i18n="andon-out.hint.tiles"></div>
+    <div class="andon-tiles" id="andon-out-tiles"></div>
+    <div class="form-row" style="margin-top:10px">
+        <button type="button" class="red-ui-button" id="andon-out-example"><i class="fa fa-magic"></i> <span data-i18n="andon-out.label.example"></span></button>
+    </div>
+    <div class="andon-hint" data-i18n="andon-out.hint.example"></div>
 </script>

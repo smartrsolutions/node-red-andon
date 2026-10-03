@@ -34,7 +34,8 @@
             "interval": "Höchstens ein Upload pro Intervall, mindestens 10 s.",
             "staleAfter": "Leer: dreimal das Intervall.",
             "window": "Die letzten n Punkte einer Reihe behalten und nichts, was älter ist als das Alter. 0 schaltet eine Grenze ab.",
-            "age": "max. Alter"
+            "age": "max. Alter",
+            "incomplete": "Importiere die .env oder setze einen Prefix für die Umgebung."
         },
         "import": {
             "pick": "Die Datei enthält mehrere Views. Welche?",
@@ -43,7 +44,8 @@
             "otherRelay": "Diese .env gehört zu __url__, dieses Node-RED spricht mit __relay__. Nicht importiert.",
             "done": "View __view__ importiert (Key-Version __kv__).",
             "templateOk": "Vorlage gültig: __count__ Kacheln.",
-            "templateBad": "Die Vorlage ist nicht gültig:"
+            "templateBad": "Die Vorlage ist nicht gültig:",
+            "noTemplate": "Als Nächstes: Importiere unten die Vorlage. Ohne sie kennt die View keine Kacheln, und ein Wert für eine Kachel wird abgelehnt; nur ein ganzes View-Dokument kommt durch."
         }
     }
 }

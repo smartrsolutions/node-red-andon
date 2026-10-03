@@ -36,7 +36,11 @@ module.exports = function (RED) {
         } else if (view.problem) {
             node.status({ fill: 'red', shape: 'ring', text: short(view.problem) });
         } else {
-            node.status({});
+            // Without a template only a whole view document gets through: say so on the
+            // canvas right after the deploy, not with the first value that is refused.
+            node.status(view.runtime && !view.runtime.doc
+                ? { fill: 'yellow', shape: 'ring', text: RED._('andon-out.status.noTemplate') }
+                : {});
             // The time of the last 204, while the uploads succeed. With values arriving
             // every few seconds the view is nearly always "queued"; the dot stays green
             // then, because the last upload went through, and says when it did.

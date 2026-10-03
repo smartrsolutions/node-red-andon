@@ -9,7 +9,7 @@
         <dd>Der Wert. Was er bewirkt, hängt von der Kachel ab:
             <ul>
                 <li><b>label, gauge, progress, donut</b>: Eine Zahl (bei label auch Text) ersetzt den Wert.</li>
-                <li><b>line, bar über die Zeit</b>: Eine Zahl wird an die Reihe angehängt.</li>
+                <li><b>line, bar über die Zeit</b>: Eine Zahl wird an die Reihe angehängt; ein Array aus <code>[Zeitstempel, Wert]</code>-Paaren ersetzt sie, ebenso <code>{series: [...]}</code> mit samples oder mit <code>start</code>, <code>stepSec</code> und <code>points</code>. Zeitstempel sind ISO 8601 in UTC, wie <code>Date.toISOString()</code> sie schreibt.</li>
                 <li><b>bar mit Kategorien, pie, donut</b>: Ein Array ersetzt die Werte, einer pro Kategorie.</li>
                 <li><b>table</b>: ein Array von Zeilen; eine Zeile ist ein Array von Zellen.</li>
                 <li><b>timeline</b>: Eine Zustands-ID beginnt ein neues Segment.</li>
@@ -37,6 +37,11 @@
     <h3>Details</h3>
     <p>Werte werden gesammelt und höchstens einmal pro Intervall der View gesendet. Der Status einer Kachel ist dein
        Urteil: Die App rechnet ihn nicht aus. Mit dem Haken <i>Status aus Bands</i> in der View wird er abgeleitet.</p>
-    <p>Ein Wert, der nicht zu seiner Kachel passt, wird abgelehnt und an einen Catch-Node gemeldet. Die View bleibt, wie sie war.</p>
+    <p>Der Dialog zeigt die Kacheln der View und was jede nimmt. <i>Beispiel-Flow einfügen</i> setzt einen Inject- und
+       einen Function-Node vor diesen Node, die an jede Kachel einen Beispielwert senden: ein Anfang für deine eigene Quelle.</p>
+    <p>Ein Wert, der nicht zu seiner Kachel passt, wird abgelehnt und an einen Catch-Node gemeldet, mit dem, was die
+       Kachel nimmt. Die View bleibt, wie sie war.</p>
+    <p>Eine View ohne Schlüssel markiert diesen Node schon vor dem Deploy als nicht konfiguriert. Eine View ohne Vorlage
+       zeigt nach dem Deploy <i>keine Vorlage</i> am Node: Sie nimmt dann nur ein ganzes View-Dokument.</p>
     <p>Kommt kein Wert, wird nichts gesendet. Die App zeigt die View dann als veraltet, sobald ihre Zeit abgelaufen ist.</p>
 </script>

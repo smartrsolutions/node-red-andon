@@ -34,7 +34,8 @@
             "interval": "At most one upload per interval, 10 s at least.",
             "staleAfter": "Empty: three times the interval.",
             "window": "Keep the last n points of a series, and nothing older than the age. 0 switches a limit off.",
-            "age": "max. age"
+            "age": "max. age",
+            "incomplete": "Import the .env, or set a prefix for the environment."
         },
         "import": {
             "pick": "The file holds several views. Which one?",
@@ -43,7 +44,8 @@
             "otherRelay": "This .env belongs to __url__; this Node-RED talks to __relay__. Not imported.",
             "done": "Imported view __view__ (key version __kv__).",
             "templateOk": "Template valid: __count__ tiles.",
-            "templateBad": "The template is not valid:"
+            "templateBad": "The template is not valid:",
+            "noTemplate": "Next: import the template below. Without it the view knows no tiles, and a value for a tile is refused; only a whole view document gets through."
         }
     }
 }

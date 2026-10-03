@@ -2,7 +2,10 @@
     "andon-out": {
         "label": {
             "name": "Name",
-            "view": "View"
+            "view": "View",
+            "tiles": "Kacheln",
+            "categories": "Kategorien",
+            "example": "Beispiel-Flow einfügen"
         },
         "status": {
             "noView": "keine View gewählt",
@@ -10,7 +13,94 @@
             "sent": "gesendet __time__",
             "sentNext": "gesendet __time__ · nächster in __sec__ s",
             "heartbeat": "Heartbeat __time__",
-            "throttled": "__time__ gedrosselt, neuer Versuch"
+            "throttled": "__time__ gedrosselt, neuer Versuch",
+            "noTemplate": "keine Vorlage: wartet auf ein ganzes View-Dokument"
+        },
+        "hint": {
+            "tiles": "Was msg.payload für jede Kachel der View sein darf; msg.topic ist die Kachel-ID. Jede Kachel nimmt außerdem ein Objekt aus Feldern, z. B. {\"value\": 79.3, \"status\": \"warning\"}; null entfernt eines.",
+            "noTemplate": "Die View hat keine Vorlage, ihre Kacheln sind hier also unbekannt. Importiere die Vorlage in der View; ohne sie nimmt der Node nur ein ganzes View-Dokument.",
+            "example": "Fügt vor diesem Node einen Inject- und einen Function-Node ein, die alle 30 s einen Beispielwert an jede Kachel senden; alle weiteren Formen jeder Kachel stehen auskommentiert darunter. Der eingefügte Code ist englisch."
+        },
+        "example": {
+            "done": "Beispiel-Flow links neben diesem Node eingefügt. Nach dem Deploy sendet er."
+        },
+        "accepts": {
+            "text": {
+                "payload": "ein Text oder eine Zahl",
+                "effect": "ersetzt den Wert"
+            },
+            "number": {
+                "payload": "eine Zahl",
+                "effect": "ersetzt den Wert"
+            },
+            "append": {
+                "payload": "eine Zahl",
+                "effect": "wird an die Reihe angehängt, zum Zeitpunkt ihres Eintreffens"
+            },
+            "appendAt": {
+                "payload": "eine Zahl mit msg.timestamp",
+                "effect": "wird zu diesem Zeitpunkt angehängt, in Millisekunden oder ISO 8601"
+            },
+            "appendTo": {
+                "payload": "eine Zahl mit msg.series",
+                "effect": "wird an die Reihe dieses Namens angehängt"
+            },
+            "pairs": {
+                "payload": "ein Array aus [Zeitstempel, Wert]-Paaren",
+                "effect": "ersetzt die Reihe; msg.series wählt welche"
+            },
+            "samples": {
+                "payload": "ein Objekt {series: [{name, samples}]}",
+                "effect": "ersetzt alle Reihen"
+            },
+            "steps": {
+                "payload": "ein Objekt {series: [{name, start, stepSec, points}]}",
+                "effect": "ersetzt alle Reihen: ein Punkt alle stepSec ab start, in UTC"
+            },
+            "values": {
+                "payload": "ein Array aus Zahlen, eine pro Kategorie",
+                "effect": "ersetzt die Werte; Kategorien: __count__"
+            },
+            "valuesTo": {
+                "payload": "ein Array aus Zahlen mit msg.series",
+                "effect": "ersetzt die Werte der Reihe dieses Namens"
+            },
+            "categories": {
+                "payload": "ein Objekt {categories, series}",
+                "effect": "ersetzt Kategorien und Werte zusammen"
+            },
+            "statuses": {
+                "payload": "ein Objekt {series: [{name, values, statuses}]}",
+                "effect": "ein Urteil pro Balken: ok, warning, critical oder null"
+            },
+            "rows": {
+                "payload": "ein Array aus Zeilen, jede ein Array aus Zellen",
+                "effect": "ersetzt die Zeilen; Spalten: __count__"
+            },
+            "rowStatus": {
+                "payload": "ein Array aus {cells, status}",
+                "effect": "ersetzt die Zeilen, mit einem Status pro Zeile"
+            },
+            "state": {
+                "payload": "eine Zustands-ID (__states__)",
+                "effect": "beginnt ein neues Segment, zum Zeitpunkt ihres Eintreffens"
+            },
+            "stateAt": {
+                "payload": "eine Zustands-ID mit msg.timestamp",
+                "effect": "beginnt das Segment zu diesem Zeitpunkt"
+            },
+            "stateLane": {
+                "payload": "eine Zustands-ID mit msg.lane",
+                "effect": "beginnt ein Segment in der Spur dieses Namens"
+            },
+            "window": {
+                "payload": "ein Objekt {from, to}",
+                "effect": "verschiebt die Zeitachse; was vor from liegt, wird abgeschnitten"
+            },
+            "fields": {
+                "payload": "ein Objekt aus Feldern, z. B. {\"status\": \"warning\"}",
+                "effect": "setzt sie; null entfernt eines"
+            }
         }
     }
 }

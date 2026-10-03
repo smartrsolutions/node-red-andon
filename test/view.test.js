@@ -190,6 +190,16 @@ test('an invalid value is refused and the document stays as it was', async () =>
     assert.ok(tileOf(uploads[0].doc, 't_shift').range, 'the refused change never reached the document');
 });
 
+test('a document the schema refuses names the fault and what the broken tile takes', () => {
+    const { rt } = runtime();
+    // What a first user wrote: a step series with a start from Date.toString().
+    const series = [{ name: 'Ist', start: 'Sat Oct 03 2026 00:39:48 GMT+0200', stepSec: 3600, points: [1, 2] }];
+    assert.throws(() => rt.receive({ topic: 't_takt', payload: { series } }), (e) => e instanceof ValidationError &&
+        /^tile "t_takt" \/series\/0\/start: timestamp must end in Z/.test(e.message) &&
+        /\. A line takes a number \(is appended to the series/.test(e.message) &&
+        !/missing required field samples/.test(e.message));
+});
+
 test('the sent event names the nodes that contributed and carries no secret', async () => {
     const { rt, clock, events } = runtime({ writeSecret: 'ws_' + 'a'.repeat(43) });
     rt.receive({ topic: 't_oee', payload: 81 }, 'n1');

@@ -9,7 +9,7 @@
         <dd>The value. What it does depends on the tile:
             <ul>
                 <li><b>label, gauge, progress, donut</b>: a number (or text for a label) replaces the value.</li>
-                <li><b>line, bar over time</b>: a number is appended to the series.</li>
+                <li><b>line, bar over time</b>: a number is appended to the series; an array of <code>[timestamp, value]</code> pairs replaces it, and so does <code>{series: [...]}</code> with samples or with <code>start</code>, <code>stepSec</code> and <code>points</code>. Timestamps are ISO 8601 in UTC, as <code>Date.toISOString()</code> writes them.</li>
                 <li><b>bar with categories, pie, donut</b>: an array replaces the values, one per category.</li>
                 <li><b>table</b>: an array of rows; a row is an array of cells.</li>
                 <li><b>timeline</b>: a state ID starts a new segment.</li>
@@ -37,6 +37,11 @@
     <h3>Details</h3>
     <p>Values are collected and sent at most once per interval of the view. The status of a tile is your judgement:
        the app does not compute it. Tick <i>status from bands</i> in the view to have it derived.</p>
-    <p>A value that does not fit its tile is refused and reported to a Catch node; the view stays as it was.</p>
+    <p>The dialog lists the tiles of the view and what each one takes. <i>Insert example flow</i> puts an inject and a
+       function node in front of this node that send an example value to every tile: a start for your own source.</p>
+    <p>A value that does not fit its tile is refused and reported to a Catch node, with what the tile takes; the view
+       stays as it was.</p>
+    <p>A view without keys marks this node as not configured before a deploy. A view without a template shows
+       <i>no template</i> on the node after one: it then takes a whole view document only.</p>
     <p>If no value arrives, nothing is sent, and the app shows the view as stale once its time is up.</p>
 </script>

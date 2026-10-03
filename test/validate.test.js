@@ -28,12 +28,18 @@ test('the sample document has no errors and no warnings', () => {
     assert.deepEqual(r.warnings, []);
 });
 
-test('the example template in examples/ is clean too', () => {
-    const flow = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'examples', 'Andon basics.json'), 'utf8'));
-    const view = flow.find((n) => n.type === 'andon-view');
-    const r = validate(JSON.parse(view.template));
-    assert.deepEqual(r.errors, []);
-    assert.deepEqual(r.warnings, []);
+test('every template in examples/ is clean too', () => {
+    const dir = path.join(__dirname, '..', 'examples');
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
+    assert.deepEqual(files.sort(), ['All tile kinds.json', 'Andon basics.json']);
+    for (const file of files) {
+        const flow = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+        const views = flow.filter((n) => n.type === 'andon-view');
+        assert.equal(views.length, 1, file);
+        const r = validate(JSON.parse(views[0].template));
+        assert.deepEqual(r.errors, [], file);
+        assert.deepEqual(r.warnings, [], file);
+    }
 });
 
 test('samples out of order are a warning, as in the configurator, not an error', () => {
@@ -82,4 +88,23 @@ test('a document too large to seal is an error, also where the configurator stil
     assert.ok(bytes > 262144 * 0.72 && bytes < 262144 * 0.95, bytes + ' bytes');
     const r = validate(doc);
     assert.match(messages(r.errors).join('\n'), /sealed it would pass the 256 KiB limit/);
+});
+
+test('a broken series names its own fault, not the other form it does not use', () => {
+    // A series has samples or start/stepSec/points. Ajv reports both forms, and
+    // a status line showing the first three said "missing samples" about a step
+    // series whose start was Date.toString().
+    const steps = variant((d) => {
+        tile(d, 't_takt').series = [{ name: 'Ist', start: 'Sat Oct 03 2026 00:00:00 GMT+0200', stepSec: 3600, points: [1, 2] }];
+    });
+    assert.deepEqual(messages(steps.errors), [
+        '/tiles/5/series/0/start timestamp must end in Z (UTC), no offset',
+        '/tiles/5/series/0/start invalid date-time',
+    ]);
+    const samples = variant((d) => { tile(d, 't_takt').series = [{ name: 'Ist', samples: [['gestern', 1]] }]; });
+    assert.doesNotMatch(messages(samples.errors).join('\n'), /start|stepSec|points/);
+    assert.match(messages(samples.errors).join('\n'), /samples\/0\/0 invalid date-time/);
+    // Neither form recognisable: both stay, so the message still names what is missing.
+    const neither = variant((d) => { tile(d, 't_takt').series = [{ name: 'Ist' }]; });
+    assert.match(messages(neither.errors).join('\n'), /missing required field samples[\s\S]*missing required field start/);
 });

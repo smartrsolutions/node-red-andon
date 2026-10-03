@@ -1,0 +1,119 @@
+[
+    {
+        "id": "andon_kinds_comment",
+        "type": "comment",
+        "name": "Andon: every tile kind",
+        "info": "A view with one tile of every kind, and a function node that sends to each of them.\n\nOpen the view \"All tile kinds\", import the .env of a view from the Andon configurator (https://andon.app/en/configurator) and deploy. Keep the template: the function node sends to exactly these tiles.\n\nBelow each tile, the function node lists every form that tile takes, as a node.send. The first one is sent every 30 s; uncomment another to try it. msg.topic is the tile ID.",
+        "x": 230,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "andon_kinds_inject",
+        "type": "inject",
+        "name": "every 30 s",
+        "props": [],
+        "repeat": "30",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "andon_kinds_example"
+            ]
+        ]
+    },
+    {
+        "id": "andon_kinds_example",
+        "type": "function",
+        "name": "Andon example",
+        "func": "// An example message for every tile of this view, written by andon out.\n// msg.topic is the tile ID. Below each tile, every form it takes: the first\n// one is sent, the others are commented out. Replace the values with your own.\n\n// t_label_1 - label - Label\n//   a text or a number (replaces the value)\nnode.send({ topic: \"t_label_1\", payload: \"Text\" });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_label_1\", payload: {\"status\":\"warning\"} });\n\n// t_label_2 - label - Label number\n//   a text or a number (replaces the value)\nnode.send({ topic: \"t_label_2\", payload: 42 });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_label_2\", payload: {\"status\":\"warning\"} });\n\n// t_gauge_3 - gauge - Gauge\n//   a number (replaces the value)\nnode.send({ topic: \"t_gauge_3\", payload: 62 });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_gauge_3\", payload: {\"status\":\"warning\"} });\n\n// t_progress_4 - progress - Progress\n//   a number (replaces the value)\nnode.send({ topic: \"t_progress_4\", payload: 30 });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_progress_4\", payload: {\"status\":\"warning\"} });\n\n// t_line_5 - line - Line\n//   a number (is appended to the series, at the time it arrives)\nnode.send({ topic: \"t_line_5\", payload: 14 });\n//   a number with msg.timestamp (is appended at that time, in milliseconds or ISO 8601)\n// node.send({ topic: \"t_line_5\", payload: 14, timestamp: Date.now() });\n//   a number with msg.series (is appended to the series of that name)\n// node.send({ topic: \"t_line_5\", payload: 10, series: \"Series B\" });\n//   an array of [timestamp, value] pairs (replaces the series; msg.series picks which)\n// node.send({ topic: \"t_line_5\", payload: [[new Date(Date.now() - 180000).toISOString(), 10], [new Date(Date.now() - 120000).toISOString(), 12], [new Date(Date.now() - 60000).toISOString(), 11], [new Date().toISOString(), 14]] });\n//   an object {series: [{name, samples}]} (replaces every series)\n// node.send({ topic: \"t_line_5\", payload: { series: [{ name: \"Series A\", samples: [[new Date(Date.now() - 180000).toISOString(), 10], [new Date(Date.now() - 120000).toISOString(), 12], [new Date(Date.now() - 60000).toISOString(), 11], [new Date().toISOString(), 14]] }, { name: \"Series B\", samples: [[new Date(Date.now() - 180000).toISOString(), 8], [new Date(Date.now() - 120000).toISOString(), 9], [new Date(Date.now() - 60000).toISOString(), 9.5], [new Date().toISOString(), 10]] }] } });\n//   an object {series: [{name, start, stepSec, points}]} (replaces every series: a point every stepSec from start, in UTC)\n// node.send({ topic: \"t_line_5\", payload: { series: [{ name: \"Series A\", start: new Date(Date.now() - 10800000).toISOString(), stepSec: 3600, points: [10,12,11,14] }, { name: \"Series B\", start: new Date(Date.now() - 10800000).toISOString(), stepSec: 3600, points: [8,9,9.5,10] }] } });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_line_5\", payload: {\"status\":\"warning\"} });\n\n// t_line_6 - line - Line steps\n//   an array of [timestamp, value] pairs (replaces the series; msg.series picks which)\nnode.send({ topic: \"t_line_6\", payload: [[new Date(Date.now() - 180000).toISOString(), 3], [new Date(Date.now() - 120000).toISOString(), 4], [new Date(Date.now() - 60000).toISOString(), 6], [new Date().toISOString(), 5]] });\n//   an object {series: [{name, samples}]} (replaces every series)\n// node.send({ topic: \"t_line_6\", payload: { series: [{ name: \"Series A\", samples: [[new Date(Date.now() - 180000).toISOString(), 3], [new Date(Date.now() - 120000).toISOString(), 4], [new Date(Date.now() - 60000).toISOString(), 6], [new Date().toISOString(), 5]] }] } });\n//   an object {series: [{name, start, stepSec, points}]} (replaces every series: a point every stepSec from start, in UTC)\n// node.send({ topic: \"t_line_6\", payload: { series: [{ name: \"Series A\", start: new Date(Date.now() - 10800000).toISOString(), stepSec: 3600, points: [3,4,6,5] }] } });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_line_6\", payload: {\"status\":\"warning\"} });\n\n// t_bar_7 - bar - Bar over time\n//   an array of [timestamp, value] pairs (replaces the series; msg.series picks which)\nnode.send({ topic: \"t_bar_7\", payload: [[new Date(Date.now() - 180000).toISOString(), 7], [new Date(Date.now() - 120000).toISOString(), 9], [new Date(Date.now() - 60000).toISOString(), 6], [new Date().toISOString(), 8]] });\n//   an object {series: [{name, samples}]} (replaces every series)\n// node.send({ topic: \"t_bar_7\", payload: { series: [{ name: \"Series A\", samples: [[new Date(Date.now() - 180000).toISOString(), 7], [new Date(Date.now() - 120000).toISOString(), 9], [new Date(Date.now() - 60000).toISOString(), 6], [new Date().toISOString(), 8]] }, { name: \"Series B\", samples: [[new Date(Date.now() - 180000).toISOString(), 8], [new Date(Date.now() - 120000).toISOString(), 8], [new Date(Date.now() - 60000).toISOString(), 8], [new Date().toISOString(), 8]] }] } });\n//   an object {series: [{name, start, stepSec, points}]} (replaces every series: a point every stepSec from start, in UTC)\n// node.send({ topic: \"t_bar_7\", payload: { series: [{ name: \"Series A\", start: new Date(Date.now() - 10800000).toISOString(), stepSec: 3600, points: [7,9,6,8] }, { name: \"Series B\", start: new Date(Date.now() - 10800000).toISOString(), stepSec: 3600, points: [8,8,8,8] }] } });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_bar_7\", payload: {\"status\":\"warning\"} });\n\n// t_bar_8 - bar - Bar\n//   an array of numbers, one per category (replaces the values; categories: 3)\nnode.send({ topic: \"t_bar_8\", payload: [4,7,2] });\n//   an object {categories, series} (replaces the categories and their values together)\n// node.send({ topic: \"t_bar_8\", payload: {\"categories\":[\"A\",\"B\",\"C\"],\"series\":[{\"name\":\"Series A\",\"values\":[4,7,2]}]} });\n//   an object {series: [{name, values, statuses}]} (a verdict per bar: ok, warning, critical or null)\n// node.send({ topic: \"t_bar_8\", payload: {\"series\":[{\"name\":\"Series A\",\"values\":[4,7,2],\"statuses\":[null,null,\"critical\"]}]} });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_bar_8\", payload: {\"status\":\"warning\"} });\n\n// t_bar_9 - bar - Bar two series\n//   an array of numbers, one per category (replaces the values; categories: 3)\nnode.send({ topic: \"t_bar_9\", payload: [4,7,2] });\n//   an array of numbers with msg.series (replaces the values of the series of that name)\n// node.send({ topic: \"t_bar_9\", payload: [5,5,5], series: \"Series B\" });\n//   an object {categories, series} (replaces the categories and their values together)\n// node.send({ topic: \"t_bar_9\", payload: {\"categories\":[\"A\",\"B\",\"C\"],\"series\":[{\"name\":\"Series A\",\"values\":[4,7,2]},{\"name\":\"Series B\",\"values\":[5,5,5]}]} });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_bar_9\", payload: {\"status\":\"warning\"} });\n\n// t_pie_10 - pie - Pie\n//   an array of numbers, one per category (replaces the values; categories: 3)\nnode.send({ topic: \"t_pie_10\", payload: [50,30,20] });\n//   an object {categories, series} (replaces the categories and their values together)\n// node.send({ topic: \"t_pie_10\", payload: {\"categories\":[\"A\",\"B\",\"C\"],\"series\":[{\"name\":\"Series A\",\"values\":[50,30,20]}]} });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_pie_10\", payload: {\"status\":\"warning\"} });\n\n// t_donut_11 - donut - Donut\n//   a number (replaces the value)\nnode.send({ topic: \"t_donut_11\", payload: 100 });\n//   an array of numbers, one per category (replaces the values; categories: 3)\n// node.send({ topic: \"t_donut_11\", payload: [50,30,20] });\n//   an object {categories, series} (replaces the categories and their values together)\n// node.send({ topic: \"t_donut_11\", payload: {\"categories\":[\"A\",\"B\",\"C\"],\"series\":[{\"name\":\"Series A\",\"values\":[50,30,20]}]} });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_donut_11\", payload: {\"status\":\"warning\"} });\n\n// t_table_12 - table - Table\n//   an array of rows, each an array of cells (replaces the rows; columns: 3)\nnode.send({ topic: \"t_table_12\", payload: [[\"Row 1\",\"on\",1.5]] });\n//   an array of {cells, status} (replaces the rows, with a status per row)\n// node.send({ topic: \"t_table_12\", payload: [{\"cells\":[\"Row 1\",\"on\",1.5],\"status\":\"warning\"}] });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_table_12\", payload: {\"status\":\"warning\"} });\n\n// t_timeline_13 - timeline - Timeline\n//   a state ID (on, idle, off) (starts a new segment, at the time it arrives)\nnode.send({ topic: \"t_timeline_13\", payload: \"on\" });\n//   a state ID with msg.timestamp (starts the segment at that time)\n// node.send({ topic: \"t_timeline_13\", payload: \"on\", timestamp: Date.now() });\n//   a state ID with msg.lane (starts a segment in the lane of that name)\n// node.send({ topic: \"t_timeline_13\", payload: \"on\", lane: \"Lane B\" });\n//   an object {from, to} (moves the time axis; what lies before from is trimmed)\n// node.send({ topic: \"t_timeline_13\", payload: { from: new Date(Date.now() - 28800000).toISOString(), to: new Date().toISOString() } });\n//   an object of fields, e.g. {\"status\": \"warning\"} (sets them; null removes one)\n// node.send({ topic: \"t_timeline_13\", payload: {\"status\":\"warning\"} });\n\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 140,
+        "wires": [
+            [
+                "andon_kinds_out"
+            ]
+        ]
+    },
+    {
+        "id": "andon_kinds_out",
+        "type": "andon-out",
+        "name": "",
+        "view": "andon_kinds_view",
+        "x": 540,
+        "y": 140,
+        "wires": [
+            [
+                "andon_kinds_debug"
+            ]
+        ]
+    },
+    {
+        "id": "andon_kinds_debug",
+        "type": "debug",
+        "name": "Upload",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 760,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "andon_kinds_catch",
+        "type": "catch",
+        "name": "refused values",
+        "scope": [
+            "andon_kinds_out"
+        ],
+        "uncaught": false,
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "andon_kinds_errors"
+            ]
+        ]
+    },
+    {
+        "id": "andon_kinds_errors",
+        "type": "debug",
+        "name": "Errors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "error.message",
+        "targetType": "msg",
+        "x": 360,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "andon_kinds_view",
+        "type": "andon-view",
+        "name": "All tile kinds",
+        "viewId": "",
+        "kv": "",
+        "template": "{\n  \"id\": \"9c2e4f7a-1b3d-4e6f-8a0b-5c7d9e1f3a24\",\n  \"schemaVersion\": 1,\n  \"name\": \"All tile kinds\",\n  \"generatedAt\": \"2026-10-03T10:00:00Z\",\n  \"staleAfterSec\": 180,\n  \"tiles\": [\n    {\n      \"id\": \"t_label_1\",\n      \"view\": \"label\",\n      \"title\": \"Label\",\n      \"status\": \"ok\",\n      \"value\": \"Text\",\n      \"subtext\": \"A text or a number\"\n    },\n    {\n      \"id\": \"t_label_2\",\n      \"view\": \"label\",\n      \"title\": \"Label number\",\n      \"titleShort\": \"Number\",\n      \"value\": 42,\n      \"unit\": \"pcs\",\n      \"decimals\": 0\n    },\n    {\n      \"id\": \"t_gauge_3\",\n      \"view\": \"gauge\",\n      \"title\": \"Gauge\",\n      \"status\": \"ok\",\n      \"value\": 62,\n      \"unit\": \"%\",\n      \"decimals\": 0,\n      \"range\": {\n        \"min\": 0,\n        \"max\": 100\n      },\n      \"target\": 70,\n      \"bands\": [\n        {\n          \"to\": 40,\n          \"status\": \"critical\"\n        },\n        {\n          \"to\": 60,\n          \"status\": \"warning\"\n        },\n        {\n          \"to\": 100,\n          \"status\": \"ok\"\n        }\n      ]\n    },\n    {\n      \"id\": \"t_progress_4\",\n      \"view\": \"progress\",\n      \"title\": \"Progress\",\n      \"value\": 30,\n      \"unit\": \"pcs\",\n      \"decimals\": 0,\n      \"range\": {\n        \"min\": 0,\n        \"max\": 100\n      },\n      \"target\": 50\n    },\n    {\n      \"id\": \"t_line_5\",\n      \"view\": \"line\",\n      \"title\": \"Line\",\n      \"value\": 14,\n      \"unit\": \"u\",\n      \"decimals\": 1,\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"samples\": [\n            [\n              \"2026-10-03T09:00:00Z\",\n              10\n            ],\n            [\n              \"2026-10-03T09:10:00Z\",\n              12\n            ],\n            [\n              \"2026-10-03T09:20:00Z\",\n              11\n            ],\n            [\n              \"2026-10-03T09:30:00Z\",\n              14\n            ]\n          ]\n        },\n        {\n          \"name\": \"Series B\",\n          \"samples\": [\n            [\n              \"2026-10-03T09:00:00Z\",\n              8\n            ],\n            [\n              \"2026-10-03T09:10:00Z\",\n              9\n            ],\n            [\n              \"2026-10-03T09:20:00Z\",\n              9.5\n            ],\n            [\n              \"2026-10-03T09:30:00Z\",\n              10\n            ]\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_line_6\",\n      \"view\": \"line\",\n      \"title\": \"Line steps\",\n      \"titleShort\": \"Line steps\",\n      \"value\": 5,\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"start\": \"2026-10-03T08:00:00Z\",\n          \"stepSec\": 3600,\n          \"points\": [\n            3,\n            4,\n            6,\n            5\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_bar_7\",\n      \"view\": \"bar\",\n      \"title\": \"Bar over time\",\n      \"titleShort\": \"Bar time\",\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"start\": \"2026-10-03T08:00:00Z\",\n          \"stepSec\": 3600,\n          \"points\": [\n            7,\n            9,\n            6,\n            8\n          ]\n        },\n        {\n          \"name\": \"Series B\",\n          \"start\": \"2026-10-03T08:00:00Z\",\n          \"stepSec\": 3600,\n          \"points\": [\n            8,\n            8,\n            8,\n            8\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_bar_8\",\n      \"view\": \"bar\",\n      \"title\": \"Bar\",\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"categories\": [\n        \"A\",\n        \"B\",\n        \"C\"\n      ],\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"values\": [\n            4,\n            7,\n            2\n          ],\n          \"statuses\": [\n            null,\n            \"warning\",\n            null\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_bar_9\",\n      \"view\": \"bar\",\n      \"title\": \"Bar two series\",\n      \"titleShort\": \"Bar 2\",\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"categories\": [\n        \"A\",\n        \"B\",\n        \"C\"\n      ],\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"values\": [\n            4,\n            7,\n            2\n          ]\n        },\n        {\n          \"name\": \"Series B\",\n          \"values\": [\n            5,\n            5,\n            5\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_pie_10\",\n      \"view\": \"pie\",\n      \"title\": \"Pie\",\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"categories\": [\n        \"A\",\n        \"B\",\n        \"C\"\n      ],\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"values\": [\n            50,\n            30,\n            20\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_donut_11\",\n      \"view\": \"donut\",\n      \"title\": \"Donut\",\n      \"value\": 100,\n      \"unit\": \"u\",\n      \"decimals\": 0,\n      \"categories\": [\n        \"A\",\n        \"B\",\n        \"C\"\n      ],\n      \"series\": [\n        {\n          \"name\": \"Series A\",\n          \"values\": [\n            50,\n            30,\n            20\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"t_table_12\",\n      \"view\": \"table\",\n      \"title\": \"Table\",\n      \"columns\": [\n        {\n          \"title\": \"Name\"\n        },\n        {\n          \"title\": \"State\"\n        },\n        {\n          \"title\": \"Value\",\n          \"unit\": \"u\",\n          \"decimals\": 1\n        }\n      ],\n      \"rows\": [\n        {\n          \"cells\": [\n            \"Row 1\",\n            \"on\",\n            1.5\n          ],\n          \"status\": \"ok\"\n        },\n        {\n          \"cells\": [\n            \"Row 2\",\n            \"off\",\n            0\n          ]\n        },\n        {\n          \"cells\": [\n            \"Row 3\",\n            \"idle\",\n            2.25\n          ],\n          \"status\": \"warning\"\n        }\n      ]\n    },\n    {\n      \"id\": \"t_timeline_13\",\n      \"view\": \"timeline\",\n      \"title\": \"Timeline\",\n      \"from\": \"2026-10-03T08:00:00Z\",\n      \"to\": \"2026-10-03T12:00:00Z\",\n      \"states\": [\n        {\n          \"id\": \"on\",\n          \"label\": \"On\",\n          \"status\": \"ok\"\n        },\n        {\n          \"id\": \"idle\",\n          \"label\": \"Idle\",\n          \"status\": \"warning\"\n        },\n        {\n          \"id\": \"off\",\n          \"label\": \"Off\",\n          \"status\": \"critical\"\n        }\n      ],\n      \"lanes\": [\n        {\n          \"name\": \"Lane A\",\n          \"segments\": [\n            [\n              \"2026-10-03T08:00:00Z\",\n              \"on\"\n            ],\n            [\n              \"2026-10-03T09:30:00Z\",\n              \"idle\"\n            ],\n            [\n              \"2026-10-03T10:00:00Z\",\n              \"on\"\n            ]\n          ]\n        },\n        {\n          \"name\": \"Lane B\",\n          \"segments\": [\n            [\n              \"2026-10-03T08:00:00Z\",\n              \"off\"\n            ],\n            [\n              \"2026-10-03T09:00:00Z\",\n              \"on\"\n            ],\n            [\n              \"2026-10-03T11:00:00Z\",\n              \"idle\"\n            ]\n          ]\n        }\n      ]\n    }\n  ]\n}",
+        "intervalSec": 30,
+        "staleAfterSec": "",
+        "notify": "auto",
+        "windowPoints": 60,
+        "windowAgeSec": 0,
+        "derive": []
+    }
+]

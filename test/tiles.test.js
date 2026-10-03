@@ -45,6 +45,27 @@ test('a number for a line is appended as a sample and becomes its value', () => 
     assert.equal(tile(next, 't_takt').value, 31.9);
 });
 
+test('an array for a line replaces the series with its [timestamp, value] pairs', () => {
+    const samples = [['2026-09-22T18:00:00Z', 30.1], ['2026-09-22T18:30:00Z', 31.4]];
+    const { doc } = apply(template(), { topic: 't_takt', payload: samples }, opts());
+    assert.deepEqual(tile(doc, 't_takt').series[0].samples, samples);
+    assert.deepEqual(validate(doc).errors, []);
+});
+
+test('an array of pairs replaces a step series too, and later numbers append to it', () => {
+    const pairs = [['2026-09-22T18:00:00Z', 120], ['2026-09-22T18:30:00Z', 130]];
+    const { doc } = apply(template(), { topic: 't_pieces_hour', payload: pairs, series: 'Target' }, opts());
+    assert.deepEqual(tile(doc, 't_pieces_hour').series[1], { name: 'Target', samples: pairs });
+    assert.deepEqual(validate(doc).errors, []);
+
+    // live as the runtime keeps it: a series the array filled is data, not template.
+    const first = apply(template(), { topic: 't_takt', payload: pairs }, opts({ live: new Set() }));
+    const live = new Set(first.touched);
+    const { doc: next } = apply(first.doc, { topic: 't_takt', payload: 140 }, opts({ live }));
+    assert.equal(tile(next, 't_takt').series[0].samples.length, 3);
+    assert.equal(tile(next, 't_takt').value, 140);
+});
+
 test('the window keeps a series at its last n points', () => {
     const { doc } = apply(template(), { topic: 't_takt', payload: 31.9 }, opts({ window: { points: 5, ageSec: 0 } }));
     const s = tile(doc, 't_takt').series[0].samples;

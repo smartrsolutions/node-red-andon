@@ -38,8 +38,18 @@
         });
     }
 
+    // Keys without a template upload nothing a tile can take: say so where the
+    // template goes, as soon as the keys are there.
+    function noTemplate() {
+        $('#andon-view-tmsg').removeClass('andon-ok andon-err').addClass('andon-err').text(t('andon-view.import.noTemplate')).show();
+    }
+
     function checkTemplate(text, derive, quiet) {
-        if (!text.trim()) { renderTiles([], derive); $('#andon-view-tmsg').hide(); return; }
+        if (!text.trim()) {
+            renderTiles([], derive);
+            if ($('#node-config-input-viewId').val() || $('#node-config-input-envPrefix').val()) { noTemplate(); } else { $('#andon-view-tmsg').hide(); }
+            return;
+        }
         $.ajax({
             url: 'andon-view/check', method: 'POST', contentType: 'application/json',
             data: JSON.stringify({ template: text }),
@@ -60,7 +70,17 @@
         category: 'config',
         defaults: {
             name: { value: '' },
-            viewId: { value: '', required: false, validate: function (v) { return !v || /^vw_[a-z2-7]{26}$/.test(v); } },
+            // Empty only with a prefix: then the environment supplies it. Without either,
+            // the .env was never imported, and the canvas marks every andon out on this
+            // view before a deploy rather than after the first value.
+            // No required: false - Node-RED skips the check of an empty field then. Two
+            // parameters: only such a validator may return a message instead of false.
+            viewId: { value: '', validate: function (v, opt) { // eslint-disable-line no-unused-vars
+                if (v) { return /^vw_[a-z2-7]{26}$/.test(v); }
+                var field = $('#node-config-input-envPrefix');
+                var prefix = field.length ? field.val() : this.envPrefix;
+                return prefix ? true : t('andon-view.hint.incomplete');
+            } },
             envPrefix: { value: '', validate: function (v) { return !v || /^[A-Z][A-Z0-9_]*_$/.test(v); } },
             // Empty means 1, or <prefix>KEY_VERSION when a prefix is set - a field
             // that always holds 1 would make that variable unreachable.
@@ -113,6 +133,7 @@
                         $('#node-config-input-contentKey').val(v.contentKey).trigger('change');
                         message('ok', t('andon-view.import.done', { view: v.view, kv: v.kv }) +
                             (parsed.problems.length ? ' ' + t('andon-view.import.problems', { list: parsed.problems.join('; ') }) : ''));
+                        if (!$('#node-config-input-template').val().trim()) { noTemplate(); }
                     });
                 });
             });
@@ -137,6 +158,9 @@
                 derive = derive.filter(function (x) { return x !== id; });
                 if (this.checked) { derive.push(id); }
             });
+
+            // The view ID's check reads the prefix field: re-run it when that changes.
+            $('#node-config-input-envPrefix').on('change keyup', function () { $('#node-config-input-viewId').trigger('change'); });
 
             checkTemplate(node.template || '', derive, true);
         },
