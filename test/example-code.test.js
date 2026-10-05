@@ -33,6 +33,23 @@ function everyForm(code) {
     return code.replace(/^\/\/ node\.send/gm, 'node.send');
 }
 
+/** returned switches the code to its commented-out single message, as the comment says, and runs it. */
+function returned(code) {
+    const lines = code.split('\n');
+    const start = lines.indexOf('// return { payload: {');
+    const end = lines.indexOf('// } };');
+    assert.ok(start > 0 && end > start, 'the single message is in the code');
+    const switched = lines.map((line, i) => {
+        if (/^node\.send/.test(line)) { return '// ' + line; }
+        return i >= start && i <= end ? line.replace(/^\/\/ /, '') : line;
+    }).join('\n');
+    const sent = [];
+    // eslint-disable-next-line no-new-func
+    const msg = new Function('node', switched)({ send: (m) => sent.push(m) });
+    assert.deepEqual(sent, []);
+    return msg;
+}
+
 function runtime(doc) {
     return new ViewRuntime({
         view: 'vw_totavbtprh6rdpgg2m2f6vrwny', kv: 1, key: Buffer.alloc(32), template: doc,
@@ -57,6 +74,27 @@ for (const [name, doc] of [['the sample document', template()], ['the example "A
         const sent = run(exampleCode(doc));
         assert.deepEqual(sent.map((m) => m.topic), doc.tiles.map((t) => t.id));
         assert.deepEqual(taken(doc, sent, false), []);
+    });
+
+    test(name + ': the commented-out single message holds the same values and is taken', () => {
+        const code = exampleCode(doc);
+        const sent = run(code);
+        const msg = returned(code);
+        assert.equal(msg.topic, undefined);
+        assert.deepEqual(Object.keys(msg.payload), sent.map((m) => m.topic));
+        const rt = runtime(doc);
+        const { changed, warnings } = rt.receive(msg);
+        assert.deepEqual(warnings, []);
+        // Taken as one message, it changes what the node.send lines change.
+        const one = runtime(doc);
+        const each = sent.flatMap((m) => one.receive(m).changed);
+        assert.deepEqual(changed.sort(), each.sort());
+    });
+
+    test(name + ': a whole view document, as the comment names it, is taken too', () => {
+        const { id, schemaVersion, name: title, tiles } = doc;
+        const { warnings } = runtime(null).receive({ payload: { id, schemaVersion, name: title, tiles } });
+        assert.deepEqual(warnings, []);
     });
 
     test(name + ': every commented-out form is taken too', () => {

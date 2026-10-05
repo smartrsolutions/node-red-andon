@@ -3,6 +3,14 @@
 Versions follow [semantic versioning](https://semver.org): a major version may
 break an existing flow, and its entry says what to change.
 
+## 1.2.1
+
+- **Insert example flow shows the single message too.** Below the `node.send`
+  lines, commented out, the same values as one message without `msg.topic`:
+  `return { payload: { tileId: value, ... } }`, for a source that has all its
+  values at once. The README says when to use it and what a whole view document does
+  instead. The example *All tile kinds* carries it as well.
+
 ## 1.2.0
 
 - **A second example, All tile kinds**: a view with one tile of every kind - two

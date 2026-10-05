@@ -86,7 +86,8 @@ A number cannot be appended to a series in the step form: it has no timestamp of
 its own. Send pairs or a whole series instead; either replaces the step form.
 
 The dialog of `andon out` lists these forms for the tiles of your view, and *Insert
-example flow* writes all of them into a function node, one `node.send` each.
+example flow* writes all of them into a function node, one `node.send` each, and
+below them, commented out, the same values as one message without `msg.topic`.
 
 Numbers may arrive as text (`"79.3"`), as MQTT and most PLC nodes deliver them.
 
@@ -103,12 +104,21 @@ msg.payload = { series: [{ name: 'Today', start: midnight.toISOString(), stepSec
 
 A series has at least one point.
 
-Without `msg.topic`:
+Without `msg.topic`, one message can carry several tiles - the natural shape for
+a function node that has all its values at once, from one query or one API call:
 
 ```js
-msg.payload = { t_oee: 79.3, t_shift: 580 };   // several tiles at once
-msg.payload = { id: "…", tiles: [ … ] };         // a whole view document, replaces the state
+return { payload: { t_oee: 79.3, t_shift: 580, t_reasons: [4, 7, 2] } };
 ```
+
+Each value takes the same forms as with `msg.topic`. The message is taken or
+refused as a whole, and `msg.series`, `msg.lane` and `msg.timestamp` apply to every
+tile in it; for a value that needs its own, use `msg.topic`. Sent one by one or as
+one message, values that arrive together go out in the same upload.
+
+A whole view document as `msg.payload` (it has `tiles`) replaces the state,
+template included - for a source that builds its tiles itself rather than filling
+those of a template. `generatedAt` and `staleAfterSec` are set on upload.
 
 A value that does not fit its tile is refused with an error a Catch node receives,
 and the error says what the tile takes. The view stays as it was, so one bad value

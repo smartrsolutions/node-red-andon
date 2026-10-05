@@ -250,9 +250,12 @@
     /**
      * exampleCode is the source of the function node "Insert example flow" writes:
      * for every tile every form it takes, each a node.send under its description.
-     * The first is live, the others are commented out, ready to swap in. It lands in
-     * a flow, so it is English whatever language the editor speaks, and it names no
-     * view: the same code serves any view with these tiles.
+     * The first is live, the others are commented out, ready to swap in. Below them,
+     * commented out, the live values once more as one message without msg.topic:
+     * the shape for a source that has all its values at once, which nothing else in
+     * the editor shows. It lands in a flow, so it is English whatever language the
+     * editor speaks, and it names no view: the same code serves any view with these
+     * tiles.
      */
     function exampleCode(doc) {
         var lines = [
@@ -260,6 +263,7 @@
             '// msg.topic is the tile ID. Below each tile, every form it takes: the first',
             '// one is sent, the others are commented out. Replace the values with your own.',
         ];
+        var first = [];
         (doc && Array.isArray(doc.tiles) ? doc.tiles : []).forEach(function (tile) {
             var list = forms(tile);
             if (!list.length) { return; }
@@ -269,7 +273,22 @@
                 lines.push('//   ' + describe(f));
                 lines.push((i === 0 ? '' : '// ') + 'node.send({ topic: ' + json(tile.id) + ', payload: ' + f.code + props + ' });');
             });
+            first.push('//     ' + json(tile.id) + ': ' + list[0].code);
         });
+        if (first.length) {
+            lines.push('',
+                '// The same values as one message: without msg.topic, msg.payload is an object',
+                '// of tile IDs and values, for a source that has them all at once. The message',
+                '// is taken or refused as a whole, and msg.series, msg.lane and msg.timestamp',
+                '// would apply to every tile in it. To use it, comment out the node.send lines',
+                '// above and remove the // in front of the lines below.',
+                '// A whole view document as msg.payload (with id, schemaVersion, name and tiles)',
+                '// replaces the template instead: for a source that builds its tiles itself.',
+                '//',
+                '// return { payload: {',
+                first.join(',\n'),
+                '// } };');
+        }
         lines.push('', 'return null;');
         return lines.join('\n');
     }

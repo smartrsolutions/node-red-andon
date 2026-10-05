@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.smartr.solutions/andon/v1/view.schema.json",
+  "$id": "https://andon.app/spec/view-v1.schema.json",
   "title": "Andon view",
   "description": "One document per view: tile definitions and their data (schema version 1). Strict for producers and the configurator; the app itself reads tolerantly.",
   "type": "object",
