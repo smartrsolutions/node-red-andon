@@ -1,8 +1,11 @@
 # Andon for Node-RED
 
-Send values from Node-RED to [Andon](https://andon.app), the iPhone app that shows
-your data as tiles and widgets. Everything is end-to-end encrypted: the content key
-stays in your Node-RED, and only the devices you paired can read what you send.
+Send values from Node-RED to [Andon](https://andon.app), the app for iPhone and iPad
+that shows your data as tiles and widgets. Everything is end-to-end encrypted: the
+content key stays in your Node-RED, and only the devices you paired can read what
+you send.
+
+**Get the app:** [Andon on the App Store](https://apps.apple.com/app/id6819064723).
 
 ```
 [MQTT oee] ──┐
@@ -29,7 +32,8 @@ needs from you are the keys of a view.
 2. **Create a view** in the [configurator](https://andon.app/en/configurator) and
    download the `.env`. Leave the tiles alone, and do not download the template:
    the example has its own.
-3. **Pair** your iPhone: scan the configurator's QR code with the Andon app.
+3. **Pair** your iPhone: scan the configurator's QR code with the
+   [Andon app](https://apps.apple.com/app/id6819064723).
 4. **Import the example**: *Import → Examples → @smartrsolutions/node-red-andon → Andon basics*.
 5. **Open the view** `Getting started` (the pencil next to *View* in `andon out`)
    and click *Import .env*. Only that one: the simulator sends to the tiles the
@@ -40,7 +44,8 @@ needs from you are the keys of a view.
 
 1. **Design** your tiles in the [configurator](https://andon.app/en/configurator) and
    create the view there. Download the `.env` and the template.
-2. **Pair** your iPhone: scan the configurator's QR code with the Andon app.
+2. **Pair** your iPhone: scan the configurator's QR code with the
+   [Andon app](https://apps.apple.com/app/id6819064723).
 3. **Add an `andon out`** node to a flow. Next to *View*, add a new view and open it
    with the pencil, then click *Import .env* and *Import template*.
 4. **Connect your sources** to the node: `msg.topic` is the tile ID, `msg.payload`
@@ -188,7 +193,20 @@ secret.
 
 Node-RED 3.0 or newer, Node.js 18 or newer.
 
+The package is built on [`@smartrsolutions/andon-client`](https://www.npmjs.com/package/@smartrsolutions/andon-client),
+which npm installs with it. To send from your own Node.js code, without Node-RED,
+use that one: the same rules, values set by tile ID.
+
+## Contributing
+
+The package is developed in a private repository next to the Andon relay and its
+specification; its GitHub repository is a public mirror that receives every release
+as one commit. Issues are welcome there, or by mail to <support@andon.app>. Pull
+requests cannot be merged in the mirror, because the next release would overwrite
+them: a change we take arrives with the next release. Security problems: please
+write to <support@andon.app> instead of opening a public issue.
+
 ## License
 
-Copyright 2026 SMARTR.solutions. Licensed under the Apache License, Version 2.0;
-the text is in the file `LICENSE` of this package.
+Copyright 2026 SMARTR.solutions. MIT License; the text is in the file `LICENSE` of
+this package. Versions up to 1.2.1 were published under the Apache License 2.0.

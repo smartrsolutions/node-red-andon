@@ -3,6 +3,26 @@
 Versions follow [semantic versioning](https://semver.org): a major version may
 break an existing flow, and its entry says what to change.
 
+## 1.3.0
+
+Nothing changes for a flow: the same nodes, settings, messages, texts and status,
+and the state a restart restores is read as before.
+
+- **Built on [`@smartrsolutions/andon-client`](https://www.npmjs.com/package/@smartrsolutions/andon-client)**,
+  the package for sending to Andon from any Node.js process. What a value does to
+  its tile, the validation, the sealing and when an upload goes out now come from
+  there, so Node-RED and your own code keep the same rules. `ajv` is no longer a
+  dependency of this package; it comes with the core.
+- **Numeric text is checked in linear time.** A message carrying a long run of
+  digits that is not a number, say from MQTT, held up the flow for a time growing
+  with the square of its length; it is now refused at once. What counts as a number
+  is the same.
+- **MIT License.** From this version on the package is published under the MIT
+  License instead of the Apache License 2.0. Versions up to 1.2.1 keep the license
+  they were published under.
+- **The README links the app** on the App Store, and says how to contribute
+  (it was `CONTRIBUTING.md` in the repository).
+
 ## 1.2.1
 
 - **Insert example flow shows the single message too.** Below the `node.send`

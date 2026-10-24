@@ -244,3 +244,48 @@ test('a refused value does not count as real data', async () => {
     await clock.advance(0);
     assert.ok(tileOf(uploads[0].doc, 't_takt').series[0].samples.length > 1, 'template points still there');
 });
+
+// The state a restart restores (nodes/andon-view.js keeps it in the node context as
+// { stamp, doc, fingerprint, live }). A persistent context store writes it as JSON,
+// and a store written by one version is read by the next: these tests pin that
+// shape and what a runtime does with it.
+async function savedState(messages) {
+    const { rt, clock, events } = runtime();
+    messages.forEach((m) => rt.receive(m));
+    await clock.advance(0);
+    const sent = events.filter((e) => e.type === 'sent').pop();
+    return JSON.parse(JSON.stringify({ doc: sent.doc, fingerprint: sent.fingerprint, live: sent.live }));
+}
+
+test('the sent event carries the state a restart restores, and it survives JSON', async () => {
+    const saved = await savedState([{ topic: 't_takt', payload: 31.5 }]);
+    assert.deepEqual(Object.keys(saved).sort(), ['doc', 'fingerprint', 'live']);
+    assert.ok(Array.isArray(saved.doc.tiles));
+    assert.match(saved.fingerprint, /^[0-9a-f]{64}$/);
+    assert.deepEqual(saved.live, ['t_takt|series|' + tileOf(saved.doc, 't_takt').series[0].name]);
+});
+
+test('a restored state goes on where it stopped', async () => {
+    const saved = await savedState([{ topic: 't_takt', payload: 31.5 }]);
+    const { rt, clock, uploads } = runtime({ restored: saved });
+    await clock.advance(1000);
+    rt.receive({ topic: 't_takt', payload: 31.7 });
+    rt.receive({ topic: 't_history', payload: 'run' });
+    await clock.advance(0);
+    const samples = tileOf(uploads[0].doc, 't_takt').series[0].samples;
+    assert.deepEqual(samples.slice(-2), [['2026-09-22T18:40:00Z', 31.5], ['2026-09-22T18:40:01Z', 31.7]], 'appended, not replaced');
+    assert.deepEqual(tileOf(uploads[0].doc, 't_history').lanes[0].segments, [['2026-09-22T18:40:01Z', 'run']],
+        'a lane the restored state never touched still starts over from the template');
+    assert.equal(uploads[0].env.notify, false, 'the statuses are the ones last sent: nothing to wake');
+});
+
+test('a restored state from a whole document counts everything as real', async () => {
+    const doc = template();
+    const saved = await savedState([{ payload: doc }]);
+    assert.equal(saved.live, null);
+    const { rt, clock, uploads } = runtime({ restored: saved });
+    const before = tileOf(saved.doc, 't_takt').series[0].samples.length;
+    rt.receive({ topic: 't_takt', payload: 31.7 });
+    await clock.advance(0);
+    assert.equal(tileOf(uploads[0].doc, 't_takt').series[0].samples.length, Math.min(before + 1, 60));
+});
