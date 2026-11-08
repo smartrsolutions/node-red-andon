@@ -1,15 +1,15 @@
 # Andon for Node-RED
 
-Send values from Node-RED to [Andon](https://andon.app), the app for iPhone and iPad
+Send values from Node-RED to [Andon](https://andon.app), the app for iPhone, iPad and Android
 that shows your data as tiles and widgets. Everything is end-to-end encrypted: the
 content key stays in your Node-RED, and only the devices you paired can read what
 you send.
 
-**Get the app:** [Andon on the App Store](https://apps.apple.com/app/id6819064723).
+**Get the app:** [Andon on the App Store](https://apps.apple.com/app/id6819064723) or [on Google Play](https://play.google.com/store/apps/details?id=solutions.smartr.andon).
 
 ```
 [MQTT oee] ──┐
-[S7 count] ──┼──► [andon out] ──► iPhone
+[S7 count] ──┼──► [andon out] ──► iPhone, iPad, Android
 [SQL order] ─┘
 ```
 
@@ -32,20 +32,20 @@ needs from you are the keys of a view.
 2. **Create a view** in the [configurator](https://andon.app/en/configurator) and
    download the `.env`. Leave the tiles alone, and do not download the template:
    the example has its own.
-3. **Pair** your iPhone: scan the configurator's QR code with the
-   [Andon app](https://apps.apple.com/app/id6819064723).
+3. **Pair** your iPhone, iPad or Android device: scan the configurator's QR code
+   with the Andon app.
 4. **Import the example**: *Import → Examples → @smartrsolutions/node-red-andon → Andon basics*.
 5. **Open the view** `Getting started` (the pencil next to *View* in `andon out`)
    and click *Import .env*. Only that one: the simulator sends to the tiles the
    example came with, and another template would replace them.
-6. **Deploy.** The node turns green, and the tiles appear on your iPhone.
+6. **Deploy.** The node turns green, and the tiles appear on your device.
 
 ### Your own tiles
 
 1. **Design** your tiles in the [configurator](https://andon.app/en/configurator) and
    create the view there. Download the `.env` and the template.
-2. **Pair** your iPhone: scan the configurator's QR code with the
-   [Andon app](https://apps.apple.com/app/id6819064723).
+2. **Pair** your iPhone, iPad or Android device: scan the configurator's QR code
+   with the Andon app.
 3. **Add an `andon out`** node to a flow. Next to *View*, add a new view and open it
    with the pencil, then click *Import .env* and *Import template*.
 4. **Connect your sources** to the node: `msg.topic` is the tile ID, `msg.payload`

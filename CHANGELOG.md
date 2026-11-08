@@ -3,6 +3,14 @@
 Versions follow [semantic versioning](https://semver.org): a major version may
 break an existing flow, and its entry says what to change.
 
+## 1.3.1
+
+Nothing changes for a flow.
+
+- **The texts name every platform.** The package description, the README and the
+  node's help say iPhone, iPad and Android, and the README links Google Play next to
+  the App Store.
+
 ## 1.3.0
 
 Nothing changes for a flow: the same nodes, settings, messages, texts and status,
